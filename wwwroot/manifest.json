@@ -1,7 +1,25 @@
 {
   "name": "LubeLogger",
+  "short_name": "LubeLogger",
   "start_url": "/",
   "display": "standalone",
+  "theme_color": "#FF6600",
+  "background_color": "#111111",
+  "shortcuts": [
+    {
+      "name": "Quick Fuel",
+      "short_name": "Quick Fuel",
+      "description": "Quickly log a fuel fill-up",
+      "url": "/Vehicle/QuickFuel",
+      "icons": [
+        {
+          "src": "/defaults/lubelogger_icon_192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
   "icons": [
     {
       "src": "/defaults/lubelogger_icon_72.png",

@@ -1,0 +1,99 @@
+@* =============================================================
+   QuickFuel.cshtml — PWA Vehicle Picker (start_url for shortcut)
+   Shows all vehicles as large tap cards → goes to pump entry.
+   ============================================================= *@
+@using CarCareTracker.Helper
+@inject IConfigHelper config
+@model List<CarCareTracker.Models.VehicleViewModel>
+@{
+    ViewData["Title"] = "Quick Fuel";
+}
+
+@section Scripts {
+    <script src="~/js/pump-nav.js?v=@StaticHelper.VersionNumber"></script>
+}
+
+<div class="quick-fuel-page">
+
+    <!-- Header -->
+    <div class="quick-fuel-header">
+        <img src="@config.GetSmallLogoUrl()" alt="LubeLogger" />
+        <div class="quick-fuel-header-text">
+            <strong>⛽ QUICK FUEL</strong>
+            Select a vehicle to log a fill-up
+        </div>
+    </div>
+
+    <!-- Vehicle Cards -->
+    <div class="quick-fuel-vehicles">
+        @if (Model != null && Model.Any())
+        {
+            foreach (var vehicle in Model)
+            {
+                if (string.IsNullOrWhiteSpace(vehicle.SoldDate))
+                {
+                    <a class="quick-fuel-card"
+                       href="/Vehicle/Index?vehicleId=@vehicle.Id&pumpTab=gas"
+                       id="qf-vehicle-@vehicle.Id">
+                        <img class="quick-fuel-card-img"
+                             src="@vehicle.ImageLocation"
+                             alt="@vehicle.Year @vehicle.Make @vehicle.Model"
+                             onerror="this.src='/defaults/lubelogger_icon_128.png'" />
+                        <div class="quick-fuel-card-info">
+                            <div class="quick-fuel-card-name">
+                                @vehicle.Year @vehicle.Make @vehicle.Model
+                            </div>
+                            <div class="quick-fuel-card-odo">
+                                @if (vehicle.LastReportedMileage > 0)
+                                {
+                                    <span>&#x1F4CD; @vehicle.LastReportedMileage.ToString("N0") mi</span>
+                                }
+                                else
+                                {
+                                    <span>Tap to log fuel</span>
+                                }
+                            </div>
+                        </div>
+                        <div class="quick-fuel-card-arrow">
+                            <i class="bi bi-chevron-right"></i>
+                        </div>
+                    </a>
+                }
+            }
+        }
+        else
+        {
+            <div style="text-align:center; padding: 40px 20px; font-family: 'Share Tech Mono', monospace; color: #555;">
+                <div style="font-size: 3rem; margin-bottom: 12px;">🚗</div>
+                <div>No vehicles found.</div>
+                <div style="margin-top:8px; font-size:0.8rem;">
+                    <a href="/" style="color:#FF8C00;">Go to Garage</a> to add a vehicle.
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- PWA Install Banner (shown when app is installable) -->
+    <div id="pump-install-banner"
+         style="display:none; position:fixed; bottom:16px; left:16px; right:16px;
+                background:#1e1e1e; border:1.5px solid #FF6600; border-radius:12px;
+                padding:14px 16px; align-items:center; gap:12px; z-index:500;
+                font-family:'Share Tech Mono',monospace; font-size:0.82rem; color:#ddd;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.6);">
+        <i class="bi bi-phone" style="color:#FF8C00; font-size:1.4rem; flex-shrink:0;"></i>
+        <div style="flex:1;">
+            <strong style="color:#FF8C00; display:block;">Add to Home Screen</strong>
+            Install Quick Fuel for one-tap access
+        </div>
+        <button onclick="pumpShowInstallPrompt()"
+                style="background:#FF6600; border:none; border-radius:7px; color:#fff;
+                       padding:8px 14px; font-family:inherit; font-size:0.8rem; cursor:pointer;">
+            Install
+        </button>
+        <button onclick="this.parentElement.style.display='none'"
+                style="background:none; border:none; color:#555; font-size:1.2rem; cursor:pointer; padding:4px;">
+            ✕
+        </button>
+    </div>
+
+</div>

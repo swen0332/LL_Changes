@@ -1,0 +1,200 @@
+@* =============================================================
+   _GasPumpEntry.cshtml — Pump-style fuel entry partial view
+   Injected into the gas-tab pane as the new fuel entry UI.
+   ============================================================= *@
+@using CarCareTracker.Helper
+@inject IConfigHelper config
+@model CarCareTracker.Models.PumpViewModel
+@{
+    var vehicleId = Model.Id;
+    var vehicleName = Model.VehicleName;
+    var lastOdo = Model.LastOdometer;
+}
+
+<div class="pump-page" id="pumpEntryPage">
+
+    <!-- Close button: goes back to gas records list -->
+    <a id="pump-close-x"
+       class="pump-close-btn"
+       href="#"
+       onclick="hidePumpEntry(); return false;"
+       title="Close">&#x2715;</a>
+
+    <!-- Vehicle label -->
+    <div class="pump-vehicle-header">
+        <strong>@vehicleName</strong>
+        Fuel Entry
+    </div>
+
+    <!-- ── ODOMETER ─────────────────────────────────────────── -->
+    <div class="odometer-section">
+        <div class="odometer-panel" id="pump-odometer-display" data-prev-odo="@lastOdo" title="Tap to enter odometer">
+            <div class="odometer-label">
+                <i class="bi bi-speedometer2"></i> ODOMETER &mdash; mi
+            </div>
+            <div class="odometer-frame">
+                <div class="odo-digit" id="odo-d0">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+                <div class="odo-digit" id="odo-d1">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+                <div class="odo-digit" id="odo-d2">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+                <div class="odo-digit" id="odo-d3">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+                <div class="odo-digit" id="odo-d4">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+                <div class="odo-digit" id="odo-d5">
+                    <div class="odo-digit-inner">
+                        <div class="odo-digit-value">0</div>
+                    </div>
+                </div>
+            </div>
+            <div class="odometer-tap-hint">TAP TO EDIT</div>
+        </div>
+    </div>
+
+    <!-- ── GAS PUMP PANEL ───────────────────────────────────── -->
+    <div class="pump-section">
+        <div class="pump-panel">
+
+            <!-- Brand strip -->
+            <div class="pump-brand-stripe">
+                <div class="pump-brand-dot"></div>
+                <span>AUTHORIZED FUEL STATION</span>
+            </div>
+
+            <div class="pump-display-area">
+
+                <!-- TOTAL COST display -->
+                <div class="pump-display-block pump-mb" id="pump-block-cost">
+                    <div class="pump-display-label">TOTAL COST &nbsp;$</div>
+                    <div class="pump-display-value" id="pump-display-cost">0.00</div>
+                </div>
+
+                <!-- Divider -->
+                <div class="pump-divider"></div>
+
+                <!-- GALLONS display -->
+                <div class="pump-display-block" id="pump-block-gallons">
+                    <div class="pump-display-label">GALLONS</div>
+                    <div class="pump-display-value" id="pump-display-gallons">0.000</div>
+                </div>
+
+            </div><!-- /display-area -->
+
+            <!-- Computed live readout -->
+            <div class="pump-computed-row">
+                <div class="pump-computed-item" id="pump-computed-ppg">
+                    $/gal: <span>---</span>
+                </div>
+                <div class="pump-computed-item" id="pump-computed-mpg">
+                    est MPG: <span>---</span>
+                </div>
+            </div>
+
+        </div><!-- /pump-panel -->
+
+        <!-- Save Step 1 button -->
+        <button class="pump-save-btn" id="pump-save-step1" type="button">
+            <i class="bi bi-fuel-pump"></i> SAVE FILL-UP
+        </button>
+
+    </div><!-- /pump-section -->
+
+    <!-- Hidden inputs for numeric keyboard (mobile) -->
+    <input type="number" inputmode="decimal" id="pump-hidden-cost"
+           class="pump-hidden-input" min="0" step="1" tabindex="-1" />
+    <input type="number" inputmode="decimal" id="pump-hidden-gallons"
+           class="pump-hidden-input" min="0" step="1" tabindex="-1" />
+
+    <!-- ── SUCCESS OVERLAY ──────────────────────────────────── -->
+    <div class="pump-success-overlay" id="pump-success-overlay">
+        <div class="pump-success-icon">⛽</div>
+        <div class="pump-success-text">FILL-UP SAVED!</div>
+        <div class="pump-success-sub">Returning to fuel records...</div>
+    </div>
+
+</div><!-- /pump-page -->
+
+<!-- ── SLIDE-UP DRAWER (Step 2) ──────────────────────────── -->
+<div class="pump-drawer-backdrop" id="pump-drawer-backdrop"></div>
+<div class="pump-drawer" id="pump-drawer" role="dialog" aria-label="Additional fuel details">
+    <div class="pump-drawer-handle"></div>
+    <div class="pump-drawer-title">Additional Details</div>
+    <div class="pump-drawer-body">
+
+        <!-- Date -->
+        <div class="mb-3">
+            <label class="form-label" for="pump-drawer-date">&#x1F4C5; Date</label>
+            <input type="text" class="form-control" id="pump-drawer-date"
+                   placeholder="MM/DD/YYYY" autocomplete="off" />
+        </div>
+
+        <!-- Fill to Full toggle -->
+        <div class="pump-toggle-row" onclick="document.getElementById('pump-drawer-fillfull').click()">
+            <label class="pump-toggle-label" for="pump-drawer-fillfull">
+                <i class="bi bi-droplet-fill" style="color:#FF8C00;"></i>
+                Fill to Full?
+            </label>
+            <input class="form-check-input" type="checkbox" id="pump-drawer-fillfull" checked
+                   onclick="event.stopPropagation()" />
+        </div>
+
+        <!-- Notes -->
+        <div class="mb-3">
+            <label class="form-label" for="pump-drawer-notes">&#x1F4DD; Notes</label>
+            <textarea class="form-control" id="pump-drawer-notes" rows="2"
+                      placeholder="Optional notes..."></textarea>
+        </div>
+
+        <!-- Tags -->
+        <div class="mb-3">
+            <label class="form-label" for="pump-drawer-tags">&#x1F3F7;&#xFE0F; Tags</label>
+            <input type="text" class="form-control" id="pump-drawer-tags"
+                   placeholder="Add tags..." />
+        </div>
+
+        <!-- Confirm button -->
+        <button class="pump-drawer-confirm-btn" id="pump-drawer-confirm" type="button">
+            CONFIRM &amp; SAVE
+        </button>
+
+        <div style="height: env(safe-area-inset-bottom, 12px);"></div>
+    </div>
+</div>
+
+<script>
+    // Initialize pump UI when this partial loads
+    (function () {
+        // Init date picker on drawer date input (uses existing bootstrap-datepicker)
+        if (typeof initDatePicker === 'function') {
+            initDatePicker($('#pump-drawer-date'));
+        }
+        // Init tag input on drawer tags (uses existing bootstrap-tagsinput)
+        if (typeof initTagSelector === 'function') {
+            initTagSelector($('#pump-drawer-tags'));
+        }
+        // Init the pump logic
+        if (typeof initPumpUI === 'function') {
+            initPumpUI({
+                vehicleId: @vehicleId,
+                lastOdometer: @lastOdo
+            });
+        }
+    })();
+</script>
