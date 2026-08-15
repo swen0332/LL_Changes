@@ -1,7 +1,7 @@
 /* =============================================================
    pump-ui.js  —  Gas Pump Entry Page Logic
-   Handles: pump display input, odometer, slide-up drawer,
-            save flow, success animation, PWA install prompt.
+   Handles: pump display input, direct typable odometer,
+            cost / gallon formatting, slide-up drawer, API save.
    ============================================================= */
 
 (function () {
@@ -14,14 +14,14 @@
         prevOdo: 0
     };
 
-    /* ── Odometer digit wheel animation ────────────────────────── */
+    /* ── Odometer digit wheel display ──────────────────────────── */
     function setOdometerDisplay(value) {
         var digits = document.querySelectorAll('.odo-digit');
         if (!digits.length) return;
         var intVal = Math.max(0, Math.round(Number(value) || 0));
         var str = intVal.toString().padStart(6, '0');
         if (str.length > 6) {
-            str = str.slice(-6); // take last 6 digits
+            str = str.slice(-6);
         }
         digits.forEach(function (digitEl, i) {
             var newVal = str[i] || '0';
@@ -33,6 +33,71 @@
                 }
             }
         });
+    }
+
+    /* ── Cost Input Sanitizer & Formatter ──────────────────────── */
+    // Max 3 digits before decimal, max 2 digits after decimal (0.00 - 999.99)
+    function sanitizeCostInput(val) {
+        var cleaned = val.replace(/[^0-9.]/g, '');
+        var parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+            parts = cleaned.split('.');
+        }
+        // Cap integer part to 3 digits (999)
+        if (parts[0].length > 3) {
+            parts[0] = parts[0].slice(0, 3);
+        }
+        // Cap decimal part to 2 digits (.99)
+        if (parts.length > 1 && parts[1].length > 2) {
+            parts[1] = parts[1].slice(0, 2);
+        }
+        return parts.join('.');
+    }
+
+    function formatCostOnBlur() {
+        var input = document.getElementById('pump-input-cost');
+        if (!input) return;
+        var raw = input.value.trim();
+        if (raw === '') return;
+        var num = parseFloat(raw);
+        if (!isNaN(num) && num > 0) {
+            num = Math.min(num, 999.99);
+            input.value = num.toFixed(2);
+        } else {
+            input.value = '0.00';
+        }
+        updateComputedRow();
+    }
+
+    function sanitizeGallonsInput(val) {
+        var cleaned = val.replace(/[^0-9.]/g, '');
+        var parts = cleaned.split('.');
+        if (parts.length > 2) {
+            cleaned = parts[0] + '.' + parts.slice(1).join('');
+            parts = cleaned.split('.');
+        }
+        if (parts[0].length > 4) {
+            parts[0] = parts[0].slice(0, 4);
+        }
+        if (parts.length > 1 && parts[1].length > 3) {
+            parts[1] = parts[1].slice(0, 3);
+        }
+        return parts.join('.');
+    }
+
+    function formatGallonsOnBlur() {
+        var input = document.getElementById('pump-input-gallons');
+        if (!input) return;
+        var raw = input.value.trim();
+        if (raw === '') return;
+        var num = parseFloat(raw);
+        if (!isNaN(num) && num > 0) {
+            input.value = num.toFixed(3);
+        } else {
+            input.value = '0.000';
+        }
+        updateComputedRow();
     }
 
     /* ── Live Computed Readout ─────────────────────────────────── */
@@ -90,6 +155,9 @@
 
     /* ── Validation ────────────────────────────────────────────── */
     function validateStep1() {
+        formatCostOnBlur();
+        formatGallonsOnBlur();
+
         var costInput = document.getElementById('pump-input-cost');
         var galInput = document.getElementById('pump-input-gallons');
         var odoInput = document.getElementById('pump-input-odometer');
@@ -140,7 +208,7 @@
             vehicleId: vehicleId,
             date: gasDate,
             mileage: odoVal,
-            gallons: galVal.toString(),
+            gallons: galVal.toFixed(3),
             cost: costVal.toFixed(2),
             isFillToFull: isFillFull,
             missedFuelUp: false,
@@ -249,28 +317,49 @@
         _state.prevOdo = lastOdometer;
         _state.odometerValue = lastOdometer;
 
-        // Populate initial odometer display
+        // Set initial odometer display
         setOdometerDisplay(lastOdometer);
 
-        // Odometer direct input listener
+        // Odometer input listener (directly typed on the odometer wheels)
         var odoInput = document.getElementById('pump-input-odometer');
+        var odoFrame = document.getElementById('pump-odometer-frame');
         if (odoInput) {
             odoInput.addEventListener('input', function () {
-                var val = parseInt(odoInput.value, 10) || 0;
+                // Keep only numbers, max 6 digits
+                var clean = odoInput.value.replace(/[^0-9]/g, '').slice(0, 6);
+                odoInput.value = clean;
+                var val = parseInt(clean, 10) || 0;
                 setOdometerDisplay(val);
                 updateComputedRow();
             });
+            odoInput.addEventListener('focus', function () {
+                if (odoFrame) odoFrame.classList.add('active');
+            });
+            odoInput.addEventListener('blur', function () {
+                if (odoFrame) odoFrame.classList.remove('active');
+            });
         }
 
-        // Pump cost and gallons listeners
+        // Cost input listener (max 3 digits before decimal, 2 after)
         var costInput = document.getElementById('pump-input-cost');
         if (costInput) {
-            costInput.addEventListener('input', updateComputedRow);
+            costInput.addEventListener('input', function () {
+                var cleaned = sanitizeCostInput(costInput.value);
+                costInput.value = cleaned;
+                updateComputedRow();
+            });
+            costInput.addEventListener('blur', formatCostOnBlur);
         }
 
+        // Gallons input listener
         var galInput = document.getElementById('pump-input-gallons');
         if (galInput) {
-            galInput.addEventListener('input', updateComputedRow);
+            galInput.addEventListener('input', function () {
+                var cleaned = sanitizeGallonsInput(galInput.value);
+                galInput.value = cleaned;
+                updateComputedRow();
+            });
+            galInput.addEventListener('blur', formatGallonsOnBlur);
         }
 
         // Step 1 save button

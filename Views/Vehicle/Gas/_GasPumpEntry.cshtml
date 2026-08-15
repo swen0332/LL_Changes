@@ -34,32 +34,33 @@
                     <i class="bi bi-speedometer2"></i> ODOMETER &mdash; MILES
                 </div>
                 <div class="odometer-edit-badge">
-                    <i class="bi bi-pencil-fill me-1"></i> TYPE OR ADJUST
+                    <i class="bi bi-pencil-fill me-1"></i> TAP TO TYPE
                 </div>
             </div>
-            <div class="odometer-display-row">
-                <div class="odometer-frame">
+            <div class="odometer-frame-wrapper">
+                <div class="odometer-frame" id="pump-odometer-frame">
                     <div class="odo-digit" id="odo-d0"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
                     <div class="odo-digit" id="odo-d1"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
                     <div class="odo-digit" id="odo-d2"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
                     <div class="odo-digit" id="odo-d3"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
                     <div class="odo-digit" id="odo-d4"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
                     <div class="odo-digit" id="odo-d5"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                </div>
-                <div class="odometer-input-wrap">
-                    <input type="number"
+                    <!-- Transparent overlay input directly over the odometer wheels -->
+                    <input type="text"
                            inputmode="numeric"
+                           pattern="[0-9]*"
+                           maxlength="7"
                            id="pump-input-odometer"
-                           class="odometer-direct-input"
+                           class="odometer-overlay-input"
                            value="@(lastOdo > 0 ? lastOdo.ToString() : "")"
-                           placeholder="@(lastOdo > 0 ? lastOdo.ToString() : "Mileage")"
+                           placeholder="@(lastOdo > 0 ? lastOdo.ToString() : "")"
                            autocomplete="off" />
                 </div>
             </div>
             @if (lastOdo > 0)
             {
                 <div class="odometer-prev-hint">
-                    Previous: @lastOdo.ToString("N0") mi
+                    Previous Fill-Up: @lastOdo.ToString("N0") mi
                 </div>
             }
         </div>

@@ -18,15 +18,23 @@ namespace CarCareTracker.Controllers
             }
             var viewModels = vehicles.Select(v =>
             {
-                var lastMileage = _vehicleLogic.GetMaxMileage(v.Id);
-                if (lastMileage == 0)
+                var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(v.Id);
+                int lastMileage = 0;
+                if (gasRecs.Any())
                 {
-                    var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(v.Id);
-                    if (gasRecs.Any())
+                    lastMileage = gasRecs.OrderByDescending(x => x.Date)
+                                         .ThenByDescending(x => x.Mileage)
+                                         .FirstOrDefault()?.Mileage ?? 0;
+                    if (lastMileage == 0)
                     {
                         lastMileage = gasRecs.Max(x => x.Mileage);
                     }
                 }
+                if (lastMileage == 0)
+                {
+                    lastMileage = _vehicleLogic.GetMaxMileage(v.Id);
+                }
+
                 return new VehicleViewModel
                 {
                     Id = v.Id,
@@ -49,22 +57,30 @@ namespace CarCareTracker.Controllers
         public IActionResult GetGasPumpEntryPartialView(int vehicleId)
         {
             var vehicle = _dataAccess.GetVehicleById(vehicleId);
-            var lastMileage = _vehicleLogic.GetMaxMileage(vehicleId);
-            if (lastMileage == 0)
+            var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(vehicleId);
+            int lastFuelMileage = 0;
+            if (gasRecs.Any())
             {
-                var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(vehicleId);
-                if (gasRecs.Any())
+                lastFuelMileage = gasRecs.OrderByDescending(x => x.Date)
+                                         .ThenByDescending(x => x.Mileage)
+                                         .FirstOrDefault()?.Mileage ?? 0;
+                if (lastFuelMileage == 0)
                 {
-                    lastMileage = gasRecs.Max(x => x.Mileage);
+                    lastFuelMileage = gasRecs.Max(x => x.Mileage);
                 }
             }
+            if (lastFuelMileage == 0)
+            {
+                lastFuelMileage = _vehicleLogic.GetMaxMileage(vehicleId);
+            }
+
             var pumpModel = new PumpViewModel
             {
                 Id = vehicle.Id,
                 Year = vehicle.Year,
                 Make = vehicle.Make,
                 Model = vehicle.Model,
-                LastOdometer = lastMileage
+                LastOdometer = lastFuelMileage
             };
             return PartialView("Gas/_GasPumpEntry", pumpModel);
         }
