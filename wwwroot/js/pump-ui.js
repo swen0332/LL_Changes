@@ -44,11 +44,11 @@
             cleaned = parts[0] + '.' + parts.slice(1).join('');
             parts = cleaned.split('.');
         }
-        // Cap integer part to 3 digits (999)
+        // Cap integer part to 3 digits (max 999)
         if (parts[0].length > 3) {
             parts[0] = parts[0].slice(0, 3);
         }
-        // Cap decimal part to 2 digits (.99)
+        // Cap decimal part to 2 digits (max .99)
         if (parts.length > 1 && parts[1].length > 2) {
             parts[1] = parts[1].slice(0, 2);
         }
@@ -70,6 +70,8 @@
         updateComputedRow();
     }
 
+    /* ── Gallons Input Sanitizer & Formatter ───────────────────── */
+    // Max 2 digits before decimal, max 3 digits after decimal (0.000 - 99.999)
     function sanitizeGallonsInput(val) {
         var cleaned = val.replace(/[^0-9.]/g, '');
         var parts = cleaned.split('.');
@@ -77,9 +79,11 @@
             cleaned = parts[0] + '.' + parts.slice(1).join('');
             parts = cleaned.split('.');
         }
-        if (parts[0].length > 4) {
-            parts[0] = parts[0].slice(0, 4);
+        // Cap integer part to 2 digits (max 99)
+        if (parts[0].length > 2) {
+            parts[0] = parts[0].slice(0, 2);
         }
+        // Cap decimal part to 3 digits (max .999)
         if (parts.length > 1 && parts[1].length > 3) {
             parts[1] = parts[1].slice(0, 3);
         }
@@ -93,6 +97,7 @@
         if (raw === '') return;
         var num = parseFloat(raw);
         if (!isNaN(num) && num > 0) {
+            num = Math.min(num, 99.999);
             input.value = num.toFixed(3);
         } else {
             input.value = '0.000';
@@ -325,7 +330,6 @@
         var odoFrame = document.getElementById('pump-odometer-frame');
         if (odoInput) {
             odoInput.addEventListener('input', function () {
-                // Keep only numbers, max 6 digits
                 var clean = odoInput.value.replace(/[^0-9]/g, '').slice(0, 6);
                 odoInput.value = clean;
                 var val = parseInt(clean, 10) || 0;
@@ -351,7 +355,7 @@
             costInput.addEventListener('blur', formatCostOnBlur);
         }
 
-        // Gallons input listener
+        // Gallons input listener (max 2 digits before decimal, 3 after)
         var galInput = document.getElementById('pump-input-gallons');
         if (galInput) {
             galInput.addEventListener('input', function () {
