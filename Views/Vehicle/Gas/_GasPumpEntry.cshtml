@@ -18,7 +18,7 @@
        class="pump-close-btn"
        href="#"
        onclick="hidePumpEntry(); return false;"
-       title="Close">&#x2715;</a>
+       title="Close (View Records Table)">&#x2715;</a>
 
     <!-- Vehicle label -->
     <div class="pump-vehicle-header">
@@ -28,43 +28,40 @@
 
     <!-- ── ODOMETER ─────────────────────────────────────────── -->
     <div class="odometer-section">
-        <div class="odometer-panel" id="pump-odometer-display" data-prev-odo="@lastOdo" title="Tap to enter odometer">
-            <div class="odometer-label">
-                <i class="bi bi-speedometer2"></i> ODOMETER &mdash; mi
-            </div>
-            <div class="odometer-frame">
-                <div class="odo-digit" id="odo-d0">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
+        <div class="odometer-panel" id="pump-odometer-panel" onclick="document.getElementById('pump-input-odometer').focus()">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div class="odometer-label mb-0">
+                    <i class="bi bi-speedometer2"></i> ODOMETER &mdash; MILES
                 </div>
-                <div class="odo-digit" id="odo-d1">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
-                </div>
-                <div class="odo-digit" id="odo-d2">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
-                </div>
-                <div class="odo-digit" id="odo-d3">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
-                </div>
-                <div class="odo-digit" id="odo-d4">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
-                </div>
-                <div class="odo-digit" id="odo-d5">
-                    <div class="odo-digit-inner">
-                        <div class="odo-digit-value">0</div>
-                    </div>
+                <div class="odometer-edit-badge">
+                    <i class="bi bi-pencil-fill me-1"></i> TYPE OR ADJUST
                 </div>
             </div>
-            <div class="odometer-tap-hint">TAP TO EDIT</div>
+            <div class="odometer-display-row">
+                <div class="odometer-frame">
+                    <div class="odo-digit" id="odo-d0"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                    <div class="odo-digit" id="odo-d1"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                    <div class="odo-digit" id="odo-d2"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                    <div class="odo-digit" id="odo-d3"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                    <div class="odo-digit" id="odo-d4"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                    <div class="odo-digit" id="odo-d5"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
+                </div>
+                <div class="odometer-input-wrap">
+                    <input type="number"
+                           inputmode="numeric"
+                           id="pump-input-odometer"
+                           class="odometer-direct-input"
+                           value="@(lastOdo > 0 ? lastOdo.ToString() : "")"
+                           placeholder="@(lastOdo > 0 ? lastOdo.ToString() : "Mileage")"
+                           autocomplete="off" />
+                </div>
+            </div>
+            @if (lastOdo > 0)
+            {
+                <div class="odometer-prev-hint">
+                    Previous: @lastOdo.ToString("N0") mi
+                </div>
+            }
         </div>
     </div>
 
@@ -81,18 +78,32 @@
             <div class="pump-display-area">
 
                 <!-- TOTAL COST display -->
-                <div class="pump-display-block pump-mb" id="pump-block-cost">
+                <div class="pump-display-block pump-mb" id="pump-block-cost" onclick="document.getElementById('pump-input-cost').focus()">
                     <div class="pump-display-label">TOTAL COST &nbsp;$</div>
-                    <div class="pump-display-value" id="pump-display-cost">0.00</div>
+                    <div class="pump-input-wrapper">
+                        <input type="text"
+                               inputmode="decimal"
+                               id="pump-input-cost"
+                               class="pump-display-input"
+                               placeholder="0.00"
+                               autocomplete="off" />
+                    </div>
                 </div>
 
                 <!-- Divider -->
                 <div class="pump-divider"></div>
 
                 <!-- GALLONS display -->
-                <div class="pump-display-block" id="pump-block-gallons">
+                <div class="pump-display-block" id="pump-block-gallons" onclick="document.getElementById('pump-input-gallons').focus()">
                     <div class="pump-display-label">GALLONS</div>
-                    <div class="pump-display-value" id="pump-display-gallons">0.000</div>
+                    <div class="pump-input-wrapper">
+                        <input type="text"
+                               inputmode="decimal"
+                               id="pump-input-gallons"
+                               class="pump-display-input"
+                               placeholder="0.000"
+                               autocomplete="off" />
+                    </div>
                 </div>
 
             </div><!-- /display-area -->
@@ -115,12 +126,6 @@
         </button>
 
     </div><!-- /pump-section -->
-
-    <!-- Hidden inputs for numeric keyboard (mobile) -->
-    <input type="number" inputmode="decimal" id="pump-hidden-cost"
-           class="pump-hidden-input" min="0" step="1" tabindex="-1" />
-    <input type="number" inputmode="decimal" id="pump-hidden-gallons"
-           class="pump-hidden-input" min="0" step="1" tabindex="-1" />
 
     <!-- ── SUCCESS OVERLAY ──────────────────────────────────── -->
     <div class="pump-success-overlay" id="pump-success-overlay">
@@ -179,17 +184,13 @@
 </div>
 
 <script>
-    // Initialize pump UI when this partial loads
     (function () {
-        // Init date picker on drawer date input (uses existing bootstrap-datepicker)
         if (typeof initDatePicker === 'function') {
             initDatePicker($('#pump-drawer-date'));
         }
-        // Init tag input on drawer tags (uses existing bootstrap-tagsinput)
         if (typeof initTagSelector === 'function') {
             initTagSelector($('#pump-drawer-tags'));
         }
-        // Init the pump logic
         if (typeof initPumpUI === 'function') {
             initPumpUI({
                 vehicleId: @vehicleId,

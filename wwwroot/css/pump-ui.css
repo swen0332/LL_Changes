@@ -4,7 +4,6 @@
    X close button, quick-fuel vehicle picker, PWA chrome.
    ============================================================= */
 
-/* ── Google Font: Share Tech Mono for LCD feel ───────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
 /* ─────────────────────────────────────────────────────────────
@@ -17,7 +16,7 @@
   flex-direction: column;
   align-items: center;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
   position: relative;
 }
 
@@ -73,58 +72,73 @@
 .odometer-section {
   width: 100%;
   max-width: 480px;
-  padding: 12px 18px 8px;
+  padding: 10px 18px 6px;
 }
 
 .odometer-panel {
-  background: linear-gradient(160deg, #3e3e3e 0%, #2a2a2a 100%);
+  background: linear-gradient(160deg, #383838 0%, #222 100%);
   border-radius: 10px;
-  padding: 14px 18px 12px;
+  padding: 12px 16px;
   box-shadow:
     0 4px 18px rgba(0,0,0,0.55),
-    inset 0 1px 0 rgba(255,255,255,0.06);
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    0 0 0 1.5px #444;
   cursor: pointer;
   user-select: none;
-  transition: box-shadow 0.2s;
+  transition: box-shadow 0.2s, border-color 0.2s;
 }
 .odometer-panel:hover {
   box-shadow:
     0 4px 24px rgba(0,0,0,0.7),
     inset 0 1px 0 rgba(255,255,255,0.09),
-    0 0 0 1.5px #666;
+    0 0 0 1.5px #FF8C00;
 }
 .odometer-label {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   letter-spacing: 0.12em;
-  color: #888;
+  color: #aaa;
   text-transform: uppercase;
-  margin-bottom: 8px;
+}
+
+.odometer-edit-badge {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.65rem;
+  color: #FF8C00;
+  background: rgba(255, 140, 0, 0.12);
+  border: 1px solid rgba(255, 140, 0, 0.4);
+  border-radius: 4px;
+  padding: 2px 7px;
+  letter-spacing: 0.08em;
+}
+
+.odometer-display-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
-.odometer-label i { color: #aaa; }
 
 .odometer-frame {
   display: inline-flex;
   gap: 0;
   background: #080808;
-  border: 2.5px solid #999;
+  border: 2.5px solid #888;
   border-radius: 5px;
-  padding: 6px 8px;
+  padding: 4px 6px;
   box-shadow:
     inset 0 2px 8px rgba(0,0,0,0.9),
-    0 0 0 1px #555;
+    0 0 0 1px #444;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 /* Individual digit wheels */
 .odo-digit {
   display: flex;
   flex-direction: column;
-  width: 34px;
-  height: 46px;
+  width: 28px;
+  height: 40px;
   overflow: hidden;
   position: relative;
   border-right: 1px solid #333;
@@ -134,36 +148,60 @@
 .odo-digit-inner {
   display: flex;
   flex-direction: column;
-  transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .odo-digit-value {
-  width: 34px;
-  height: 46px;
+  width: 28px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
-  color: #f0f0f0;
+  color: #f5f5f5;
   letter-spacing: 0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.9);
   flex-shrink: 0;
 }
-/* Last digit (tenths) — white on red like real odometers */
-.odo-digit.odo-tenths {
-  background: #8b0000;
-  border-radius: 0 3px 3px 0;
-}
-.odo-digit.odo-tenths .odo-digit-value { color: #fff; }
 
-.odometer-tap-hint {
+.odometer-input-wrap {
+  flex: 1;
+  min-width: 120px;
+}
+
+.odometer-direct-input {
+  width: 100%;
+  background: #0a0a0a;
+  border: 1.5px solid #444;
+  border-radius: 6px;
+  color: #FF8C00;
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.62rem;
-  color: #555;
+  font-size: 1.35rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  text-align: right;
   letter-spacing: 0.08em;
-  margin-top: 7px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+}
+.odometer-direct-input:focus {
+  border-color: #FF8C00;
+  box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.25);
+  background: #000;
+}
+.odometer-direct-input::placeholder {
+  color: #555;
+  font-weight: 400;
+}
+
+.odometer-prev-hint {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.72rem;
+  color: #777;
+  letter-spacing: 0.06em;
+  margin-top: 6px;
   text-align: right;
 }
 
@@ -186,12 +224,10 @@
     0 0 0 2px #555,
     0 8px 32px rgba(0,0,0,0.7),
     inset 0 1px 0 rgba(255,255,255,0.05);
-  /* Chrome frame via multi-layer shadow */
   position: relative;
   overflow: hidden;
 }
 
-/* Metallic chrome top-edge shimmer */
 .pump-panel::before {
   content: '';
   position: absolute;
@@ -208,7 +244,6 @@
   pointer-events: none;
 }
 
-/* Brand stripe at top of pump */
 .pump-brand-stripe {
   background: linear-gradient(90deg, #1a1a1a, #2a2a2a, #1a1a1a);
   border-bottom: 1px solid #333;
@@ -244,52 +279,48 @@
 
 .pump-display-block {
   background: #0d0300;
-  border: 2.5px solid #222;
+  border: 2.5px solid #282828;
   border-radius: 8px;
-  padding: 12px 16px 14px;
-  cursor: pointer;
+  padding: 10px 14px 10px;
+  cursor: text;
   position: relative;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   box-shadow:
     inset 0 0 24px rgba(0,0,0,0.8),
     0 0 8px rgba(255, 100, 0, 0.08);
 }
+.pump-display-block:focus-within,
 .pump-display-block.active {
   border-color: #FF6600;
   box-shadow:
     inset 0 0 24px rgba(0,0,0,0.6),
-    0 0 16px rgba(255, 100, 0, 0.3);
-}
-.pump-display-block.active::after {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, #FF6600, transparent);
-  animation: scan-line 1.5s ease-in-out infinite;
-}
-@keyframes scan-line {
-  0% { opacity: 0; transform: translateX(-100%); }
-  50% { opacity: 0.8; }
-  100% { opacity: 0; transform: translateX(100%); }
+    0 0 16px rgba(255, 100, 0, 0.35);
 }
 
-/* LED label (THIS SALE $, GALLONS) */
 .pump-display-label {
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.72rem;
   letter-spacing: 0.15em;
   color: #FFB84D;
   text-transform: uppercase;
-  margin-bottom: 6px;
-  opacity: 0.85;
+  margin-bottom: 2px;
+  opacity: 0.9;
 }
 
-/* The big number display */
-.pump-display-value {
+.pump-input-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pump-display-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
   font-family: 'Share Tech Mono', monospace;
-  font-size: clamp(2.8rem, 11vw, 3.8rem);
+  font-size: clamp(2.6rem, 10vw, 3.8rem);
   font-weight: 400;
   color: #FF8C00;
   text-shadow:
@@ -298,44 +329,13 @@
     0 0 40px rgba(255, 80, 0, 0.2);
   letter-spacing: 0.08em;
   line-height: 1;
-  min-height: 1.1em;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  padding-right: 2px;
-  /* Segment-style: characters have slight spacing */
-  word-spacing: 4px;
+  text-align: right;
+  padding: 0 4px;
 }
-/* Blinking cursor when active */
-.pump-display-value.active::after {
-  content: '▌';
-  animation: cursor-blink 0.8s step-end infinite;
-  margin-left: 3px;
-  font-size: 0.7em;
-  opacity: 0.7;
+.pump-display-input::placeholder {
+  color: rgba(255, 140, 0, 0.25);
+  text-shadow: none;
 }
-@keyframes cursor-blink {
-  0%, 100% { opacity: 0.7; }
-  50% { opacity: 0; }
-}
-
-/* Segment shadow overlay — mimics dark unlit segments */
-.pump-display-block::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(
-    180deg,
-    rgba(0,0,0,0.04) 0px,
-    rgba(0,0,0,0.04) 1px,
-    transparent 1px,
-    transparent 4px
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-.pump-display-value { position: relative; z-index: 2; }
-.pump-display-label { position: relative; z-index: 2; }
 
 /* Divider bar between pump sections */
 .pump-divider {
@@ -345,14 +345,6 @@
   border-radius: 3px;
   border-top: 1px solid #111;
   border-bottom: 1px solid #555;
-  position: relative;
-}
-.pump-divider::after {
-  content: '';
-  position: absolute;
-  top: 1px; left: 0; right: 0;
-  height: 1px;
-  background: rgba(255,255,255,0.06);
 }
 
 /* Computed MPG/unit cost line under gallons */
@@ -363,19 +355,20 @@
 }
 .pump-computed-item {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 0.7rem;
-  color: #555;
+  font-size: 0.75rem;
+  color: #777;
   letter-spacing: 0.08em;
 }
 .pump-computed-item span {
-  color: #888;
+  color: #FFB84D;
+  font-weight: 700;
 }
 
 /* ── Save Button ─────────────────────────────────────────────── */
 .pump-save-btn {
-  margin: 10px 18px 20px;
+  margin: 10px 0 16px;
   padding: 16px;
-  width: calc(100% - 36px);
+  width: 100%;
   background: linear-gradient(135deg, #c45000 0%, #e06000 50%, #c45000 100%);
   border: none;
   border-radius: 10px;
@@ -402,13 +395,6 @@
 }
 .pump-save-btn:active {
   transform: scale(0.98);
-  box-shadow: 0 2px 8px rgba(196, 80, 0, 0.4);
-}
-.pump-save-btn:disabled {
-  background: #333;
-  color: #555;
-  box-shadow: none;
-  cursor: not-allowed;
 }
 
 /* ── Success Overlay ─────────────────────────────────────────── */
@@ -449,7 +435,6 @@
   color: #666;
   font-size: 0.78rem;
   letter-spacing: 0.1em;
-  animation: fade-in-up 0.4s 0.4s both;
 }
 
 /* ─────────────────────────────────────────────────────────────
@@ -506,7 +491,6 @@
   padding: 8px 20px 20px;
 }
 
-/* Drawer form fields */
 .pump-drawer-body .form-label {
   font-family: 'Share Tech Mono', monospace;
   font-size: 0.72rem;
@@ -550,7 +534,6 @@
 .pump-drawer-confirm-btn:active { transform: scale(0.98); }
 .pump-drawer-confirm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* fill-to-full toggle */
 .pump-toggle-row {
   display: flex;
   align-items: center;
@@ -572,18 +555,6 @@
   gap: 8px;
 }
 .pump-toggle-row .form-check-input { transform: scale(1.25); cursor: pointer; }
-
-/* ─────────────────────────────────────────────────────────────
-   HIDDEN NUMBER INPUT (for pump display interaction)
-   ───────────────────────────────────────────────────────────── */
-.pump-hidden-input {
-  position: fixed;
-  bottom: 100vh;
-  opacity: 0;
-  width: 1px;
-  height: 1px;
-  pointer-events: none;
-}
 
 /* ─────────────────────────────────────────────────────────────
    QUICK FUEL PAGE (PWA Vehicle Picker)
@@ -678,30 +649,4 @@
   flex-shrink: 0;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   RESPONSIVE TWEAKS
-   ───────────────────────────────────────────────────────────── */
-@media (min-width: 500px) {
-  .pump-page {
-    background: #0a0a0a;
-    padding-top: 16px;
-  }
-  .pump-panel, .odometer-panel {
-    box-shadow:
-      0 8px 40px rgba(0,0,0,0.8),
-      0 0 0 2px #555;
-  }
-}
-
-@media (max-height: 680px) {
-  .odometer-section { padding: 6px 18px 4px; }
-  .pump-display-value { font-size: clamp(2.2rem, 9vw, 3rem); }
-  .pump-display-area { padding: 8px 14px 6px; }
-  .pump-save-btn { margin: 6px 18px 12px; padding: 13px; }
-}
-
-/* ─────────────────────────────────────────────────────────────
-   UTILITIES
-   ───────────────────────────────────────────────────────────── */
 .pump-mb { margin-bottom: 12px; }
-.pump-mt { margin-top: 8px; }

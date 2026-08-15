@@ -18,8 +18,15 @@ namespace CarCareTracker.Controllers
             }
             var viewModels = vehicles.Select(v =>
             {
-                var vehicleRecords = _vehicleLogic.GetVehicleRecords(v.Id);
-                var lastMileage = _vehicleLogic.GetMaxMileage(vehicleRecords);
+                var lastMileage = _vehicleLogic.GetMaxMileage(v.Id);
+                if (lastMileage == 0)
+                {
+                    var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(v.Id);
+                    if (gasRecs.Any())
+                    {
+                        lastMileage = gasRecs.Max(x => x.Mileage);
+                    }
+                }
                 return new VehicleViewModel
                 {
                     Id = v.Id,
@@ -42,8 +49,15 @@ namespace CarCareTracker.Controllers
         public IActionResult GetGasPumpEntryPartialView(int vehicleId)
         {
             var vehicle = _dataAccess.GetVehicleById(vehicleId);
-            var vehicleRecords = _vehicleLogic.GetVehicleRecords(vehicleId);
-            var lastMileage = _vehicleLogic.GetMaxMileage(vehicleRecords);
+            var lastMileage = _vehicleLogic.GetMaxMileage(vehicleId);
+            if (lastMileage == 0)
+            {
+                var gasRecs = _gasRecordDataAccess.GetGasRecordsByVehicleId(vehicleId);
+                if (gasRecs.Any())
+                {
+                    lastMileage = gasRecs.Max(x => x.Mileage);
+                }
+            }
             var pumpModel = new PumpViewModel
             {
                 Id = vehicle.Id,
