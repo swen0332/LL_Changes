@@ -1,0 +1,34 @@
+name: Upstream Sync
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs automatically every Sunday at midnight
+  workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch upstream changes and push to upstream-sync branch
+        run: |
+          # Configure Git so it doesn't complain about identity
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Add the original creator's repository as upstream
+          git remote add upstream https://github.com/hargata/lubelog.git
+          
+          # Fetch all latest changes from their main branch
+          git fetch upstream main
+          
+          # Push their main branch to your repository under a new branch called 'upstream-sync'
+          # We use --force to ensure this branch exactly mirrors their latest state
+          git push origin upstream/main:refs/heads/upstream-sync --force
