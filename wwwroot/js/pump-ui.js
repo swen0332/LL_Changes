@@ -365,15 +365,20 @@
 
         $.get('/Vehicle/GetGasPumpEntryPartialView?vehicleId=' + vehicleId, function (html) {
             if (html) {
-                var container = document.getElementById('pumpEntryContainer');
-                var tableContainer = document.getElementById('gasRecordsTableContainer');
-                if (container) {
-                    container.innerHTML = html;
-                    container.style.display = 'block';
+                var $container = $('#pumpEntryContainer');
+                var $tableContainer = $('#gasRecordsTableContainer');
+                if ($container.length) {
+                    $container.html(html);
+                    $container.show();
                 }
-                if (tableContainer) {
-                    tableContainer.style.display = 'none';
+                if ($tableContainer.length) {
+                    $tableContainer.hide();
                 }
+                var prevOdo = parseInt($('#pump-odometer-frame').data('prev-odo'), 10) || 0;
+                initPumpUI({
+                    vehicleId: vehicleId,
+                    lastOdometer: prevOdo
+                });
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         });
