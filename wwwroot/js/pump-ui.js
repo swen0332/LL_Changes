@@ -1,7 +1,7 @@
 /* =============================================================
    pump-ui.js  —  Gas Pump Entry Page Logic
-   Handles: direct tumbler odometer, strict cost & gallons rules,
-            slide-up drawer, API save, success animation.
+   Handles: direct tumbler odometer with typeover & auto-advance,
+            strict cost & gallons rules, slide-up drawer, API save.
    ============================================================= */
 
 (function () {
@@ -38,9 +38,7 @@
         }
     }
 
-    /* ── Keyboard & Input Filters ──────────────────────────────── */
-
-    // Check if key is navigation / control
+    /* ── Keyboard & Input Control Helpers ──────────────────────── */
     function isControlKey(e) {
         return (
             e.key === 'Backspace' ||
@@ -54,18 +52,18 @@
             e.key === 'ArrowDown' ||
             e.key === 'Home' ||
             e.key === 'End' ||
-            (e.ctrlKey || e.metaKey) // allow copy/paste/select-all
+            (e.ctrlKey || e.metaKey)
         );
     }
 
-    // Cost Keydown: Max 3 digits before decimal, max 2 after decimal
+    /* ── COST INPUT: Max 3 digits before decimal, Max 2 after ──── */
     function handleCostKeydown(e) {
         if (isControlKey(e)) return;
 
         var input = e.target;
         var key = e.key;
 
-        // Allow dot only once
+        // Allow single dot
         if (key === '.') {
             if (input.value.indexOf('.') !== -1) {
                 e.preventDefault();
@@ -73,42 +71,32 @@
             return;
         }
 
-        // Only allow 0-9
+        // Only allow digits 0-9
         if (!/^[0-9]$/.test(key)) {
             e.preventDefault();
             return;
         }
 
-        // Check cursor position & parts
         var val = input.value;
         var selStart = input.selectionStart;
         var selEnd = input.selectionEnd;
-        var dotIndex = val.indexOf('.');
+        var proposed = val.slice(0, selStart) + key + val.slice(selEnd);
 
-        // If user has selected text that includes the dot or chars, allow replacement
-        if (selStart !== selEnd) return;
+        if (!/^[0-9]*\.?[0-9]*$/.test(proposed)) {
+            e.preventDefault();
+            return;
+        }
 
-        if (dotIndex === -1) {
-            // No dot yet: max 3 digits before dot
-            if (val.length >= 3) {
-                e.preventDefault();
-            }
-        } else {
-            // Dot exists
-            var beforeDot = val.slice(0, dotIndex);
-            var afterDot = val.slice(dotIndex + 1);
-
-            if (selStart <= dotIndex) {
-                // Typing before dot
-                if (beforeDot.length >= 3) {
-                    e.preventDefault();
-                }
-            } else {
-                // Typing after dot
-                if (afterDot.length >= 2) {
-                    e.preventDefault();
-                }
-            }
+        var parts = proposed.split('.');
+        // Max 3 digits before decimal
+        if (parts[0].length > 3) {
+            e.preventDefault();
+            return;
+        }
+        // Max 2 digits after decimal
+        if (parts.length > 1 && parts[1].length > 2) {
+            e.preventDefault();
+            return;
         }
     }
 
@@ -143,14 +131,14 @@
         updateComputedRow();
     }
 
-    // Gallons Keydown: Max 2 digits before decimal, max 3 after decimal
+    /* ── GALLONS INPUT: Max 2 digits before decimal, Max 3 after ── */
     function handleGallonsKeydown(e) {
         if (isControlKey(e)) return;
 
         var input = e.target;
         var key = e.key;
 
-        // Allow dot only once
+        // Allow single dot
         if (key === '.') {
             if (input.value.indexOf('.') !== -1) {
                 e.preventDefault();
@@ -158,7 +146,7 @@
             return;
         }
 
-        // Only allow 0-9
+        // Only allow digits 0-9
         if (!/^[0-9]$/.test(key)) {
             e.preventDefault();
             return;
@@ -167,28 +155,23 @@
         var val = input.value;
         var selStart = input.selectionStart;
         var selEnd = input.selectionEnd;
-        var dotIndex = val.indexOf('.');
+        var proposed = val.slice(0, selStart) + key + val.slice(selEnd);
 
-        if (selStart !== selEnd) return;
+        if (!/^[0-9]*\.?[0-9]*$/.test(proposed)) {
+            e.preventDefault();
+            return;
+        }
 
-        if (dotIndex === -1) {
-            // No dot yet: max 2 digits before dot
-            if (val.length >= 2) {
-                e.preventDefault();
-            }
-        } else {
-            var beforeDot = val.slice(0, dotIndex);
-            var afterDot = val.slice(dotIndex + 1);
-
-            if (selStart <= dotIndex) {
-                if (beforeDot.length >= 2) {
-                    e.preventDefault();
-                }
-            } else {
-                if (afterDot.length >= 3) {
-                    e.preventDefault();
-                }
-            }
+        var parts = proposed.split('.');
+        // Max 2 digits before decimal
+        if (parts[0].length > 2) {
+            e.preventDefault();
+            return;
+        }
+        // Max 3 digits after decimal
+        if (parts.length > 1 && parts[1].length > 3) {
+            e.preventDefault();
+            return;
         }
     }
 
@@ -302,7 +285,10 @@
             var ok = confirm('Odometer reading is 0. Continue anyway?');
             if (!ok) {
                 var odo0 = document.getElementById('odo-d0');
-                if (odo0) odo0.focus();
+                if (odo0) {
+                    odo0.focus();
+                    odo0.select();
+                }
                 return false;
             }
         }
@@ -424,23 +410,36 @@
         // Ensure 6 tumbler inputs have previous fill-up mileage
         setOdometerValue(lastOdometer);
 
-        // Bind 6 tumbler inputs
+        // Bind 6 tumbler inputs with Typeover & Auto-Advance
         for (var idx = 0; idx < 6; idx++) {
             (function (i) {
                 var el = document.getElementById('odo-d' + i);
                 if (!el) return;
 
-                // Select on focus
-                el.addEventListener('focus', function () {
+                function selectTumbler() {
+                    el.focus();
                     el.select();
+                }
+
+                // Focus/Click/Mouseup selection
+                el.addEventListener('focus', function () {
+                    setTimeout(selectTumbler, 10);
+                });
+                el.addEventListener('click', function () {
+                    selectTumbler();
+                });
+                el.addEventListener('mouseup', function (e) {
+                    e.preventDefault();
+                    selectTumbler();
                 });
 
-                // Keydown for auto-advance, backspace, and arrows
+                // Keydown: Direct overwrite and auto-advance to the right
                 el.addEventListener('keydown', function (e) {
                     if (isControlKey(e)) {
                         if (e.key === 'Backspace') {
                             e.preventDefault();
                             el.value = '0';
+                            updateComputedRow();
                             if (i > 0) {
                                 var prev = document.getElementById('odo-d' + (i - 1));
                                 if (prev) {
@@ -448,7 +447,6 @@
                                     prev.select();
                                 }
                             }
-                            updateComputedRow();
                         } else if (e.key === 'ArrowLeft' && i > 0) {
                             e.preventDefault();
                             var prev2 = document.getElementById('odo-d' + (i - 1));
@@ -461,12 +459,33 @@
                         return;
                     }
 
-                    // Only digits 0-9
+                    // Direct overwrite on any digit 0-9
                     if (/^[0-9]$/.test(e.key)) {
                         e.preventDefault();
-                        el.value = e.key;
+                        el.value = e.key; // Overwrite current position
                         updateComputedRow();
-                        // Advance to next tumbler
+
+                        // Move to the right one digit and select it (until the ones place)
+                        if (i < 5) {
+                            var nextEl = document.getElementById('odo-d' + (i + 1));
+                            if (nextEl) {
+                                nextEl.focus();
+                                nextEl.select();
+                            }
+                        } else {
+                            selectTumbler();
+                        }
+                    } else {
+                        e.preventDefault(); // Block all letters and non-numeric symbols
+                    }
+                });
+
+                // Mobile touch input / autocomplete handler
+                el.addEventListener('input', function () {
+                    var raw = el.value.replace(/[^0-9]/g, '');
+                    if (raw.length > 0) {
+                        el.value = raw.slice(-1); // keep newly entered digit
+                        updateComputedRow();
                         if (i < 5) {
                             var nextEl = document.getElementById('odo-d' + (i + 1));
                             if (nextEl) {
@@ -475,11 +494,12 @@
                             }
                         }
                     } else {
-                        e.preventDefault(); // block all letters, symbols
+                        el.value = '0';
+                        updateComputedRow();
                     }
                 });
 
-                // Paste support on tumblers
+                // Paste support across the 6 tumblers
                 el.addEventListener('paste', function (e) {
                     e.preventDefault();
                     var text = (e.clipboardData || window.clipboardData).getData('text');
@@ -490,9 +510,12 @@
                             if (target) target.value = digits[d];
                         }
                         updateComputedRow();
-                        var lastIdx = Math.min(5, i + digits.length);
+                        var lastIdx = Math.min(5, i + digits.length - 1);
                         var focusTarget = document.getElementById('odo-d' + lastIdx);
-                        if (focusTarget) focusTarget.focus();
+                        if (focusTarget) {
+                            focusTarget.focus();
+                            focusTarget.select();
+                        }
                     }
                 });
             })(idx);
