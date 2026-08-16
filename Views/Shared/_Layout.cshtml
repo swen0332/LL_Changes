@@ -52,7 +52,7 @@
     <link rel="stylesheet" href="~/css/theme.css" media="screen"/>
     <link rel="stylesheet" href="~/sweetalert/sweetalert2.min.css"/>
     <!-- LubeLogger Pump UI Custom -->
-    <link rel="stylesheet" href="~/css/pump-ui.css?v=@StaticHelper.VersionNumber" />
+    <link rel="stylesheet" href="~/css/pump-ui.css?v=@StaticHelper.VersionNumber" asp-append-version="true" />
     <!-- End LubeLogger Pump UI Custom -->
     <link rel="icon" sizes="192x192" href="~/defaults/lubelogger_icon_192.png" />
     <link rel="icon" sizes="128x128" href="~/defaults/lubelogger_icon_128.png" />
@@ -61,15 +61,15 @@
     <link rel="apple-touch-startup-image" href="~/defaults/lubelogger_launch.png" />
     <link rel="manifest" href="~/manifest.json">
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/js/shared.js?v=@StaticHelper.VersionNumber"></script>
+    <script src="~/js/shared.js?v=@StaticHelper.VersionNumber" asp-append-version="true"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/lib/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
     <script src="~/lib/bootstrap-tagsinput/bootstrap-tagsinput.js"></script>
     <script src="~/sweetalert/sweetalert2.all.min.js"></script>
     <script src="~/js/loader.js?v=@StaticHelper.VersionNumber"></script>
     <!-- LubeLogger Pump UI Custom JS -->
-    <script src="~/js/pump-nav.js?v=@StaticHelper.VersionNumber"></script>
-    <script src="~/js/pump-ui.js?v=@StaticHelper.VersionNumber"></script>
+    <script src="~/js/pump-nav.js?v=@StaticHelper.VersionNumber" asp-append-version="true"></script>
+    <script src="~/js/pump-ui.js?v=@StaticHelper.VersionNumber" asp-append-version="true"></script>
     <script>
         function getGlobalConfig() {
             return {
