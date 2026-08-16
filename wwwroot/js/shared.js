@@ -1,4 +1,4 @@
-﻿$.expr.pseudos.containsNC = $.expr.createPseudo(function (arg) {
+$.expr.pseudos.containsNC = $.expr.createPseudo(function (arg) {
     return function (elem) {
         return $(elem).text().toUpperCase().indexOf(arg.toUpperCase()) >= 0;
     };
@@ -80,10 +80,10 @@ function warnToast(message) {
     })
 }
 function viewVehicle(vehicleId, tab) {
-    if (tab != undefined) {
+    if (tab) {
         window.location.href = `/Vehicle/Index?vehicleId=${vehicleId}&tab=${tab}`;
     } else {
-        window.location.href = `/Vehicle/Index?vehicleId=${vehicleId}`;
+        window.location.href = `/Vehicle/Index?vehicleId=${vehicleId}&tab=gas&pump=1`;
     }
 }
 function saveVehicle(isEdit) {

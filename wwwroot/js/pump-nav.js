@@ -11,10 +11,14 @@
 
     // Override viewVehicle so selecting a vehicle from Garage flags auto-launch
     window.viewVehicle = function (vehicleId, tab) {
-        try {
-            sessionStorage.setItem('autoLaunchPump_' + vehicleId, '1');
-        } catch (e) { }
-        window.location.href = '/Vehicle/Index?vehicleId=' + vehicleId + '&tab=gas';
+        if (tab) {
+            window.location.href = '/Vehicle/Index?vehicleId=' + vehicleId + '&tab=' + tab;
+        } else {
+            try {
+                sessionStorage.setItem('autoLaunchPump_' + vehicleId, '1');
+            } catch (e) { }
+            window.location.href = '/Vehicle/Index?vehicleId=' + vehicleId + '&tab=gas&pump=1';
+        }
     };
 
     function patchGarage() {
@@ -24,7 +28,7 @@
                     try {
                         sessionStorage.setItem('autoLaunchPump_' + vehicleId, '1');
                     } catch (err) { }
-                    window.location.href = '/Vehicle/Index?vehicleId=' + vehicleId + '&tab=gas';
+                    window.location.href = '/Vehicle/Index?vehicleId=' + vehicleId + '&tab=gas&pump=1';
                 }
             };
         }

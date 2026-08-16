@@ -1,4 +1,4 @@
-﻿@using CarCareTracker.Helper
+@using CarCareTracker.Helper
 @inject IConfigHelper config
 @inject ITranslationHelper translator
 @{
@@ -285,4 +285,24 @@
     bindWindowResize();
     checkRecurringTaxes();
     bindNavBarResize();
+
+    // Auto-launch pump UI when navigating with pump=1
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('pump') === '1') {
+            var cleanUrl = window.location.pathname + '?vehicleId=@Model.Id&tab=gas';
+            window.history.replaceState({}, '', cleanUrl);
+
+            var attempts = 0;
+            var launchInterval = setInterval(function () {
+                attempts++;
+                if (typeof showPumpEntry === 'function' && $('#gas-tab-pane').length) {
+                    clearInterval(launchInterval);
+                    showPumpEntry(@Model.Id);
+                } else if (attempts > 80) {
+                    clearInterval(launchInterval);
+                }
+            }, 50);
+        }
+    })();
 </script>
