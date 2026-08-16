@@ -1,7 +1,8 @@
 /* =============================================================
    pump-ui.js  —  Gas Pump Entry Page Logic
    Handles: direct tumbler odometer with typeover & auto-advance,
-            strict cost & gallons rules, slide-up drawer, API save.
+            strict cost & gallons rules, calculation trigger condition,
+            slide-up drawer, API save.
    ============================================================= */
 
 (function () {
@@ -11,7 +12,8 @@
         cost: 0,
         gallons: 0,
         odometerValue: 0,
-        prevOdo: 0
+        prevOdo: 0,
+        odoTouched: false
     };
 
     /* ── Odometer Tumbler Helpers ───────────────────────────────── */
@@ -207,34 +209,57 @@
     }
 
     /* ── Live Computed Readout ─────────────────────────────────── */
+    // Only calculate when all 3 boxes have completed their required digits:
+    // - Total Cost: 2nd digit after decimal
+    // - Gallons: 3rd digit after decimal
+    // - Odometer: single mile value (ones digit) completed
     function updateComputedRow() {
         var mpgEl = document.getElementById('pump-computed-mpg');
         var ppgEl = document.getElementById('pump-computed-ppg');
+        if (!mpgEl || !ppgEl) return;
 
-        var costVal = parseFloat(document.getElementById('pump-input-cost')?.value) || 0;
-        var galVal = parseFloat(document.getElementById('pump-input-gallons')?.value) || 0;
+        var costInput = document.getElementById('pump-input-cost');
+        var galInput = document.getElementById('pump-input-gallons');
+
+        var costStr = costInput ? costInput.value.trim() : '';
+        var galStr = galInput ? galInput.value.trim() : '';
         var odoVal = getOdometerValue();
 
-        _state.cost = costVal;
-        _state.gallons = galVal;
-        _state.odometerValue = odoVal;
+        // Check completion criteria
+        var costNum = parseFloat(costStr);
+        var isCostComplete = (!isNaN(costNum) && costNum > 0) && (/\.[0-9]{2}$/.test(costStr));
 
-        if (ppgEl) {
-            if (galVal > 0 && costVal > 0) {
-                ppgEl.querySelector('span').textContent = '$' + (costVal / galVal).toFixed(3) + '/gal';
-            } else {
-                ppgEl.querySelector('span').textContent = '---';
-            }
-        }
+        var galNum = parseFloat(galStr);
+        var isGallonsComplete = (!isNaN(galNum) && galNum > 0) && (/\.[0-9]{3}$/.test(galStr));
 
-        if (mpgEl) {
-            var prev = _state.prevOdo;
-            var miles = odoVal - prev;
-            if (prev > 0 && miles > 0 && galVal > 0) {
-                mpgEl.querySelector('span').textContent = (miles / galVal).toFixed(1) + ' MPG';
+        var isOdometerComplete = (odoVal > 0) && (_state.odoTouched || odoVal !== _state.prevOdo);
+
+        var allComplete = isCostComplete && isGallonsComplete && isOdometerComplete;
+
+        if (allComplete) {
+            _state.cost = costNum;
+            _state.gallons = galNum;
+            _state.odometerValue = odoVal;
+
+            // Price per Gallon
+            var ppg = costNum / galNum;
+            ppgEl.querySelector('span').textContent = '$' + ppg.toFixed(3) + '/gal';
+
+            // Miles per Gallon
+            var prevOdo = _state.prevOdo;
+            var deltaMiles = odoVal - prevOdo;
+            if (prevOdo > 0 && deltaMiles > 0) {
+                var mpg = deltaMiles / galNum;
+                mpgEl.querySelector('span').textContent = mpg.toFixed(1) + ' MPG';
+            } else if (prevOdo > 0 && deltaMiles <= 0) {
+                mpgEl.querySelector('span').textContent = 'N/A';
             } else {
                 mpgEl.querySelector('span').textContent = '---';
             }
+        } else {
+            // Wait until the last box has completed its last required digit
+            ppgEl.querySelector('span').textContent = '---';
+            mpgEl.querySelector('span').textContent = '---';
         }
     }
 
@@ -246,8 +271,8 @@
         if (drawer) {
             drawer.classList.add('open');
             setTimeout(function () {
-                var firstInput = drawer.querySelector('input, select');
-                if (firstInput) firstInput.focus();
+                var confirmBtn = document.getElementById('pump-drawer-confirm');
+                if (confirmBtn) confirmBtn.focus();
             }, 300);
         }
     }
@@ -307,7 +332,7 @@
         var galVal = parseFloat(document.getElementById('pump-input-gallons')?.value) || 0;
         var odoVal = getOdometerValue();
 
-        var gasDate = dateInput ? dateInput.value : new Date().toLocaleDateString('en-US');
+        var gasDate = (dateInput && dateInput.value.trim() !== '') ? dateInput.value.trim() : new Date().toLocaleDateString('en-US');
         var isFillFull = fillFull ? fillFull.checked : true;
         var gasNotes = notes ? notes.value : '';
         var gasTags = tags ? (Array.isArray($(tags).val()) ? $(tags).val() : []) : [];
@@ -411,6 +436,7 @@
 
         _state.prevOdo = lastOdometer;
         _state.odometerValue = lastOdometer;
+        _state.odoTouched = false;
 
         // Ensure 6 tumbler inputs have previous fill-up mileage
         setOdometerValue(lastOdometer);
@@ -444,6 +470,7 @@
                         if (e.key === 'Backspace') {
                             e.preventDefault();
                             el.value = '0';
+                            _state.odoTouched = true;
                             updateComputedRow();
                             if (i > 0) {
                                 var prev = document.getElementById('odo-d' + (i - 1));
@@ -468,6 +495,7 @@
                     if (/^[0-9]$/.test(e.key)) {
                         e.preventDefault();
                         el.value = e.key; // Overwrite current position
+                        _state.odoTouched = true;
                         updateComputedRow();
 
                         // Move to the right one digit and select it (until the ones place)
@@ -490,6 +518,7 @@
                     var raw = el.value.replace(/[^0-9]/g, '');
                     if (raw.length > 0) {
                         el.value = raw.slice(-1); // keep newly entered digit
+                        _state.odoTouched = true;
                         updateComputedRow();
                         if (i < 5) {
                             var nextEl = document.getElementById('odo-d' + (i + 1));
@@ -500,6 +529,7 @@
                         }
                     } else {
                         el.value = '0';
+                        _state.odoTouched = true;
                         updateComputedRow();
                     }
                 });
@@ -514,6 +544,7 @@
                             var target = document.getElementById('odo-d' + (i + d));
                             if (target) target.value = digits[d];
                         }
+                        _state.odoTouched = true;
                         updateComputedRow();
                         var lastIdx = Math.min(5, i + digits.length - 1);
                         var focusTarget = document.getElementById('odo-d' + lastIdx);
@@ -584,14 +615,17 @@
             confirmBtn.addEventListener('click', saveRecord);
         }
 
-        // Initialize date to today
+        // Initialize datepicker with pre-entered today's date
         var dateInput = document.getElementById('pump-drawer-date');
-        if (dateInput) {
-            var today = new Date();
-            var mm = String(today.getMonth() + 1).padStart(2, '0');
-            var dd = String(today.getDate()).padStart(2, '0');
-            var yyyy = today.getFullYear();
-            dateInput.value = mm + '/' + dd + '/' + yyyy;
+        if (dateInput && typeof initDatePicker === 'function') {
+            initDatePicker($('#pump-drawer-date'));
+            if (!dateInput.value || dateInput.value.trim() === '') {
+                var today = new Date();
+                var mm = String(today.getMonth() + 1).padStart(2, '0');
+                var dd = String(today.getDate()).padStart(2, '0');
+                var yyyy = today.getFullYear();
+                dateInput.value = mm + '/' + dd + '/' + yyyy;
+            }
         }
 
         updateComputedRow();
