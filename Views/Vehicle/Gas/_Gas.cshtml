@@ -326,12 +326,24 @@
 
     // Auto-launch pump UI on vehicle click from Garage
     (function () {
+        var vId = (typeof GetVehicleId === 'function' && GetVehicleId()) ? GetVehicleId().vehicleId : (new URLSearchParams(window.location.search).get('vehicleId') || 0);
+        var shouldAutoLaunch = false;
+        try {
+            if (sessionStorage.getItem('autoLaunchPump_' + vId) === '1') {
+                shouldAutoLaunch = true;
+                sessionStorage.removeItem('autoLaunchPump_' + vId);
+            }
+        } catch (e) { }
+
         var params = new URLSearchParams(window.location.search);
-        if (params.get('pump') === '1' && typeof showPumpEntry === 'function') {
-            var vehicleId = params.get('vehicleId');
-            var cleanUrl = window.location.pathname + '?vehicleId=' + vehicleId + '&tab=gas';
+        if (params.get('pump') === '1') {
+            shouldAutoLaunch = true;
+            var cleanUrl = window.location.pathname + '?vehicleId=' + vId + '&tab=gas';
             window.history.replaceState({}, '', cleanUrl);
-            showPumpEntry();
+        }
+
+        if (shouldAutoLaunch && typeof showPumpEntry === 'function') {
+            showPumpEntry(vId);
         }
     })();
 </script>

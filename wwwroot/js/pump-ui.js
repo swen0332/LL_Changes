@@ -384,8 +384,8 @@
     }
 
     /* ── Show / Hide Pump Entry ─────────────────────────────────── */
-    window.showPumpEntry = function () {
-        var vehicleId = (typeof GetVehicleId === 'function') ? GetVehicleId().vehicleId : 0;
+    window.showPumpEntry = function (vId) {
+        var vehicleId = vId || (typeof GetVehicleId === 'function' && GetVehicleId() ? GetVehicleId().vehicleId : (new URLSearchParams(window.location.search).get('vehicleId') || 0));
         if (!vehicleId) return;
 
         $.get('/Vehicle/GetGasPumpEntryPartialView?vehicleId=' + vehicleId, function (html) {
