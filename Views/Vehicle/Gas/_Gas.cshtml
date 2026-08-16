@@ -87,7 +87,7 @@
         </div>
             <div class="lubelogger-record-add">
             <div class="btn-group">
-                <button onclick="showAddGasRecordModal()" class="btn btn-primary btn-md mt-1 mb-1"><i class="bi bi-pencil-square me-2"></i>@translator.Translate(userLanguage, "Add Gas Record")</button>
+                <button onclick="showPumpEntry()" class="btn btn-primary btn-md mt-1 mb-1"><i class="bi bi-pencil-square me-2"></i>@translator.Translate(userLanguage, "Add Gas Record")</button>
                 <button type="button" class="btn btn-md btn-primary btn-md mt-1 mb-1 dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
                     <span class="visually-hidden">Toggle Dropdown</span>
                 </button>
@@ -264,9 +264,8 @@
 <div class="row lubelogger-record-nav pt-1 hideOnPrint">
     <div class="d-flex justify-content-between">
         <button onclick="toggleSelectMode(this)" class="btn btn-outline-secondary btn-md mt-1 mb-1 select-mode-toggle"><i class="bi bi-check2-square"></i></button>
-        <div class="d-flex gap-2">
-            <button onclick="showPumpEntry()" class="btn btn-warning btn-md mt-1 mb-1" title="⛽ Pump Entry"><i class="bi bi-fuel-pump-fill"></i></button>
-            <button onclick="showAddGasRecordModal()" class="btn btn-primary btn-md mt-1 mb-1" title="Standard Form"><i class="bi bi-plus-lg"></i></button>
+        <div>
+            <button onclick="showPumpEntry()" class="btn btn-primary btn-md mt-1 mb-1" title="Add Gas Record"><i class="bi bi-plus-lg"></i></button>
         </div>
         <div>
             <button class="btn btn-outline-secondary btn-md mt-1 mb-1" onclick="showDropDownForRecordNav(this)" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-three-dots"></i></button>
@@ -320,8 +319,5 @@
             gasCostFormat: decodeHTMLEntities('@gasCostFormat'),
             gasConsumptionFormat: decodeHTMLEntities('@gasConsumptionFormat')
         }
-    }
-    if (typeof showPumpEntry === 'function') {
-        showPumpEntry();
     }
 </script>
