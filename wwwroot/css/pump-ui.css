@@ -632,3 +632,50 @@
 }
 
 .pump-mb { margin-bottom: 12px; }
+
+/* ─────────────────────────────────────────────────────────────
+   FLOATING ACTION BUTTON (FAB) & STICKY MOBILE NAV
+   ───────────────────────────────────────────────────────────── */
+.pump-fab-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 850;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c45000 0%, #e06000 100%);
+  color: #fff;
+  border: none;
+  box-shadow: 0 4px 18px rgba(224, 96, 0, 0.55), 0 2px 8px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s;
+  text-decoration: none;
+}
+.pump-fab-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 24px rgba(224, 96, 0, 0.75);
+  color: #fff;
+}
+.pump-fab-btn:active {
+  transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+  .vehicleTabPane .lubelogger-record-nav {
+    position: sticky !important;
+    bottom: 0 !important;
+    z-index: 100 !important;
+    background: rgba(22, 22, 22, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    padding: 8px 14px !important;
+    border-top: 1.5px solid #333 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.6) !important;
+  }
+}
+

@@ -273,6 +273,9 @@
             </ul>
         </div>
     </div>
+    <button type="button" class="pump-fab-btn" onclick="showPumpEntry()" title="Add Fuel Record">
+        <i class="bi bi-fuel-pump-fill"></i>
+    </button>
 </div>
 </div>
 </div>
@@ -320,4 +323,15 @@
             gasConsumptionFormat: decodeHTMLEntities('@gasConsumptionFormat')
         }
     }
+
+    // Auto-launch pump UI on vehicle click from Garage
+    (function () {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('pump') === '1' && typeof showPumpEntry === 'function') {
+            var vehicleId = params.get('vehicleId');
+            var cleanUrl = window.location.pathname + '?vehicleId=' + vehicleId + '&tab=gas';
+            window.history.replaceState({}, '', cleanUrl);
+            showPumpEntry();
+        }
+    })();
 </script>
