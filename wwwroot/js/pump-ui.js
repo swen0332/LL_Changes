@@ -1,7 +1,7 @@
 /* =============================================================
    pump-ui.js  —  Gas Pump Entry Page Logic
-   Handles: pump display input, direct typable odometer,
-            cost / gallon formatting, slide-up drawer, API save.
+   Handles: direct tumbler odometer, strict cost & gallons rules,
+            slide-up drawer, API save, success animation.
    ============================================================= */
 
 (function () {
@@ -14,41 +14,114 @@
         prevOdo: 0
     };
 
-    /* ── Odometer digit wheel display ──────────────────────────── */
-    function setOdometerDisplay(value) {
-        var digits = document.querySelectorAll('.odo-digit');
-        if (!digits.length) return;
-        var intVal = Math.max(0, Math.round(Number(value) || 0));
+    /* ── Odometer Tumbler Helpers ───────────────────────────────── */
+    function getOdometerValue() {
+        var str = '';
+        for (var i = 0; i < 6; i++) {
+            var el = document.getElementById('odo-d' + i);
+            str += (el ? el.value.replace(/[^0-9]/g, '') : '0') || '0';
+        }
+        return parseInt(str, 10) || 0;
+    }
+
+    function setOdometerValue(num) {
+        var intVal = Math.max(0, Math.round(Number(num) || 0));
         var str = intVal.toString().padStart(6, '0');
         if (str.length > 6) {
             str = str.slice(-6);
         }
-        digits.forEach(function (digitEl, i) {
-            var newVal = str[i] || '0';
-            var inner = digitEl.querySelector('.odo-digit-inner');
-            if (inner) {
-                var currentVal = inner.textContent.trim();
-                if (currentVal !== newVal) {
-                    inner.innerHTML = '<div class="odo-digit-value">' + newVal + '</div>';
-                }
+        for (var i = 0; i < 6; i++) {
+            var el = document.getElementById('odo-d' + i);
+            if (el) {
+                el.value = str[i] || '0';
             }
-        });
+        }
     }
 
-    /* ── Cost Input Sanitizer & Formatter ──────────────────────── */
-    // Max 3 digits before decimal, max 2 digits after decimal (0.00 - 999.99)
-    function sanitizeCostInput(val) {
+    /* ── Keyboard & Input Filters ──────────────────────────────── */
+
+    // Check if key is navigation / control
+    function isControlKey(e) {
+        return (
+            e.key === 'Backspace' ||
+            e.key === 'Delete' ||
+            e.key === 'Tab' ||
+            e.key === 'Enter' ||
+            e.key === 'Escape' ||
+            e.key === 'ArrowLeft' ||
+            e.key === 'ArrowRight' ||
+            e.key === 'ArrowUp' ||
+            e.key === 'ArrowDown' ||
+            e.key === 'Home' ||
+            e.key === 'End' ||
+            (e.ctrlKey || e.metaKey) // allow copy/paste/select-all
+        );
+    }
+
+    // Cost Keydown: Max 3 digits before decimal, max 2 after decimal
+    function handleCostKeydown(e) {
+        if (isControlKey(e)) return;
+
+        var input = e.target;
+        var key = e.key;
+
+        // Allow dot only once
+        if (key === '.') {
+            if (input.value.indexOf('.') !== -1) {
+                e.preventDefault();
+            }
+            return;
+        }
+
+        // Only allow 0-9
+        if (!/^[0-9]$/.test(key)) {
+            e.preventDefault();
+            return;
+        }
+
+        // Check cursor position & parts
+        var val = input.value;
+        var selStart = input.selectionStart;
+        var selEnd = input.selectionEnd;
+        var dotIndex = val.indexOf('.');
+
+        // If user has selected text that includes the dot or chars, allow replacement
+        if (selStart !== selEnd) return;
+
+        if (dotIndex === -1) {
+            // No dot yet: max 3 digits before dot
+            if (val.length >= 3) {
+                e.preventDefault();
+            }
+        } else {
+            // Dot exists
+            var beforeDot = val.slice(0, dotIndex);
+            var afterDot = val.slice(dotIndex + 1);
+
+            if (selStart <= dotIndex) {
+                // Typing before dot
+                if (beforeDot.length >= 3) {
+                    e.preventDefault();
+                }
+            } else {
+                // Typing after dot
+                if (afterDot.length >= 2) {
+                    e.preventDefault();
+                }
+            }
+        }
+    }
+
+    function sanitizeCost(val) {
         var cleaned = val.replace(/[^0-9.]/g, '');
         var parts = cleaned.split('.');
         if (parts.length > 2) {
             cleaned = parts[0] + '.' + parts.slice(1).join('');
             parts = cleaned.split('.');
         }
-        // Cap integer part to 3 digits (max 999)
         if (parts[0].length > 3) {
             parts[0] = parts[0].slice(0, 3);
         }
-        // Cap decimal part to 2 digits (max .99)
         if (parts.length > 1 && parts[1].length > 2) {
             parts[1] = parts[1].slice(0, 2);
         }
@@ -70,20 +143,65 @@
         updateComputedRow();
     }
 
-    /* ── Gallons Input Sanitizer & Formatter ───────────────────── */
-    // Max 2 digits before decimal, max 3 digits after decimal (0.000 - 99.999)
-    function sanitizeGallonsInput(val) {
+    // Gallons Keydown: Max 2 digits before decimal, max 3 after decimal
+    function handleGallonsKeydown(e) {
+        if (isControlKey(e)) return;
+
+        var input = e.target;
+        var key = e.key;
+
+        // Allow dot only once
+        if (key === '.') {
+            if (input.value.indexOf('.') !== -1) {
+                e.preventDefault();
+            }
+            return;
+        }
+
+        // Only allow 0-9
+        if (!/^[0-9]$/.test(key)) {
+            e.preventDefault();
+            return;
+        }
+
+        var val = input.value;
+        var selStart = input.selectionStart;
+        var selEnd = input.selectionEnd;
+        var dotIndex = val.indexOf('.');
+
+        if (selStart !== selEnd) return;
+
+        if (dotIndex === -1) {
+            // No dot yet: max 2 digits before dot
+            if (val.length >= 2) {
+                e.preventDefault();
+            }
+        } else {
+            var beforeDot = val.slice(0, dotIndex);
+            var afterDot = val.slice(dotIndex + 1);
+
+            if (selStart <= dotIndex) {
+                if (beforeDot.length >= 2) {
+                    e.preventDefault();
+                }
+            } else {
+                if (afterDot.length >= 3) {
+                    e.preventDefault();
+                }
+            }
+        }
+    }
+
+    function sanitizeGallons(val) {
         var cleaned = val.replace(/[^0-9.]/g, '');
         var parts = cleaned.split('.');
         if (parts.length > 2) {
             cleaned = parts[0] + '.' + parts.slice(1).join('');
             parts = cleaned.split('.');
         }
-        // Cap integer part to 2 digits (max 99)
         if (parts[0].length > 2) {
             parts[0] = parts[0].slice(0, 2);
         }
-        // Cap decimal part to 3 digits (max .999)
         if (parts.length > 1 && parts[1].length > 3) {
             parts[1] = parts[1].slice(0, 3);
         }
@@ -112,7 +230,7 @@
 
         var costVal = parseFloat(document.getElementById('pump-input-cost')?.value) || 0;
         var galVal = parseFloat(document.getElementById('pump-input-gallons')?.value) || 0;
-        var odoVal = parseInt(document.getElementById('pump-input-odometer')?.value, 10) || 0;
+        var odoVal = getOdometerValue();
 
         _state.cost = costVal;
         _state.gallons = galVal;
@@ -165,11 +283,10 @@
 
         var costInput = document.getElementById('pump-input-cost');
         var galInput = document.getElementById('pump-input-gallons');
-        var odoInput = document.getElementById('pump-input-odometer');
 
         var costVal = parseFloat(costInput ? costInput.value : '0') || 0;
         var galVal = parseFloat(galInput ? galInput.value : '0') || 0;
-        var odoVal = parseInt(odoInput ? odoInput.value : '0', 10) || 0;
+        var odoVal = getOdometerValue();
 
         if (costVal <= 0) {
             alert('Please enter the total cost.');
@@ -182,9 +299,10 @@
             return false;
         }
         if (odoVal <= 0) {
-            var ok = confirm('Odometer reading is empty or 0. Continue anyway?');
+            var ok = confirm('Odometer reading is 0. Continue anyway?');
             if (!ok) {
-                if (odoInput) odoInput.focus();
+                var odo0 = document.getElementById('odo-d0');
+                if (odo0) odo0.focus();
                 return false;
             }
         }
@@ -201,7 +319,7 @@
 
         var costVal = parseFloat(document.getElementById('pump-input-cost')?.value) || 0;
         var galVal = parseFloat(document.getElementById('pump-input-gallons')?.value) || 0;
-        var odoVal = parseInt(document.getElementById('pump-input-odometer')?.value, 10) || 0;
+        var odoVal = getOdometerValue();
 
         var gasDate = dateInput ? dateInput.value : new Date().toLocaleDateString('en-US');
         var isFillFull = fillFull ? fillFull.checked : true;
@@ -287,26 +405,7 @@
         }
     };
 
-    /* ── PWA install prompt ──────────────────────────────────────── */
-    var _deferredInstallPrompt = null;
-    window.addEventListener('beforeinstallprompt', function (e) {
-        e.preventDefault();
-        _deferredInstallPrompt = e;
-        var installBanner = document.getElementById('pump-install-banner');
-        if (installBanner) installBanner.style.display = 'flex';
-    });
-
-    window.pumpShowInstallPrompt = function () {
-        if (_deferredInstallPrompt) {
-            _deferredInstallPrompt.prompt();
-            _deferredInstallPrompt.userChoice.then(function () {
-                _deferredInstallPrompt = null;
-                var banner = document.getElementById('pump-install-banner');
-                if (banner) banner.style.display = 'none';
-            });
-        }
-    };
-
+    /* ── Service Worker ─────────────────────────────────────────── */
     function registerServiceWorker() {
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/js/pump-sw.js').catch(function () { });
@@ -322,45 +421,116 @@
         _state.prevOdo = lastOdometer;
         _state.odometerValue = lastOdometer;
 
-        // Set initial odometer display
-        setOdometerDisplay(lastOdometer);
+        // Ensure 6 tumbler inputs have previous fill-up mileage
+        setOdometerValue(lastOdometer);
 
-        // Odometer input listener (directly typed on the odometer wheels)
-        var odoInput = document.getElementById('pump-input-odometer');
-        var odoFrame = document.getElementById('pump-odometer-frame');
-        if (odoInput) {
-            odoInput.addEventListener('input', function () {
-                var clean = odoInput.value.replace(/[^0-9]/g, '').slice(0, 6);
-                odoInput.value = clean;
-                var val = parseInt(clean, 10) || 0;
-                setOdometerDisplay(val);
-                updateComputedRow();
-            });
-            odoInput.addEventListener('focus', function () {
-                if (odoFrame) odoFrame.classList.add('active');
-            });
-            odoInput.addEventListener('blur', function () {
-                if (odoFrame) odoFrame.classList.remove('active');
-            });
+        // Bind 6 tumbler inputs
+        for (var idx = 0; idx < 6; idx++) {
+            (function (i) {
+                var el = document.getElementById('odo-d' + i);
+                if (!el) return;
+
+                // Select on focus
+                el.addEventListener('focus', function () {
+                    el.select();
+                });
+
+                // Keydown for auto-advance, backspace, and arrows
+                el.addEventListener('keydown', function (e) {
+                    if (isControlKey(e)) {
+                        if (e.key === 'Backspace') {
+                            e.preventDefault();
+                            el.value = '0';
+                            if (i > 0) {
+                                var prev = document.getElementById('odo-d' + (i - 1));
+                                if (prev) {
+                                    prev.focus();
+                                    prev.select();
+                                }
+                            }
+                            updateComputedRow();
+                        } else if (e.key === 'ArrowLeft' && i > 0) {
+                            e.preventDefault();
+                            var prev2 = document.getElementById('odo-d' + (i - 1));
+                            if (prev2) { prev2.focus(); prev2.select(); }
+                        } else if (e.key === 'ArrowRight' && i < 5) {
+                            e.preventDefault();
+                            var next2 = document.getElementById('odo-d' + (i + 1));
+                            if (next2) { next2.focus(); next2.select(); }
+                        }
+                        return;
+                    }
+
+                    // Only digits 0-9
+                    if (/^[0-9]$/.test(e.key)) {
+                        e.preventDefault();
+                        el.value = e.key;
+                        updateComputedRow();
+                        // Advance to next tumbler
+                        if (i < 5) {
+                            var nextEl = document.getElementById('odo-d' + (i + 1));
+                            if (nextEl) {
+                                nextEl.focus();
+                                nextEl.select();
+                            }
+                        }
+                    } else {
+                        e.preventDefault(); // block all letters, symbols
+                    }
+                });
+
+                // Paste support on tumblers
+                el.addEventListener('paste', function (e) {
+                    e.preventDefault();
+                    var text = (e.clipboardData || window.clipboardData).getData('text');
+                    var digits = text.replace(/[^0-9]/g, '');
+                    if (digits.length > 0) {
+                        for (var d = 0; d < digits.length && (i + d) < 6; d++) {
+                            var target = document.getElementById('odo-d' + (i + d));
+                            if (target) target.value = digits[d];
+                        }
+                        updateComputedRow();
+                        var lastIdx = Math.min(5, i + digits.length);
+                        var focusTarget = document.getElementById('odo-d' + lastIdx);
+                        if (focusTarget) focusTarget.focus();
+                    }
+                });
+            })(idx);
         }
 
-        // Cost input listener (max 3 digits before decimal, 2 after)
+        // Cost input: strict decimal rules & key blocking
         var costInput = document.getElementById('pump-input-cost');
         if (costInput) {
+            costInput.addEventListener('keydown', handleCostKeydown);
             costInput.addEventListener('input', function () {
-                var cleaned = sanitizeCostInput(costInput.value);
-                costInput.value = cleaned;
+                var cleaned = sanitizeCost(costInput.value);
+                if (costInput.value !== cleaned) costInput.value = cleaned;
+                updateComputedRow();
+            });
+            costInput.addEventListener('paste', function (e) {
+                e.preventDefault();
+                var text = (e.clipboardData || window.clipboardData).getData('text');
+                var sanitized = sanitizeCost(text);
+                costInput.value = sanitized;
                 updateComputedRow();
             });
             costInput.addEventListener('blur', formatCostOnBlur);
         }
 
-        // Gallons input listener (max 2 digits before decimal, 3 after)
+        // Gallons input: strict decimal rules & key blocking
         var galInput = document.getElementById('pump-input-gallons');
         if (galInput) {
+            galInput.addEventListener('keydown', handleGallonsKeydown);
             galInput.addEventListener('input', function () {
-                var cleaned = sanitizeGallonsInput(galInput.value);
-                galInput.value = cleaned;
+                var cleaned = sanitizeGallons(galInput.value);
+                if (galInput.value !== cleaned) galInput.value = cleaned;
+                updateComputedRow();
+            });
+            galInput.addEventListener('paste', function (e) {
+                e.preventDefault();
+                var text = (e.clipboardData || window.clipboardData).getData('text');
+                var sanitized = sanitizeGallons(text);
+                galInput.value = sanitized;
                 updateComputedRow();
             });
             galInput.addEventListener('blur', formatGallonsOnBlur);

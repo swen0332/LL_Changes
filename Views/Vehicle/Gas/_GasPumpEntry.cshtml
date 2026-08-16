@@ -9,6 +9,8 @@
     var vehicleId = Model.Id;
     var vehicleName = Model.VehicleName;
     var lastOdo = Model.LastOdometer;
+    var odoStr = lastOdo > 0 ? lastOdo.ToString().PadLeft(6, '0') : "000000";
+    if (odoStr.Length > 6) { odoStr = odoStr.Substring(odoStr.Length - 6); }
 }
 
 <div class="pump-page" id="pumpEntryPage">
@@ -28,33 +30,23 @@
 
     <!-- ── ODOMETER ─────────────────────────────────────────── -->
     <div class="odometer-section">
-        <div class="odometer-panel" id="pump-odometer-panel" onclick="document.getElementById('pump-input-odometer').focus()">
+        <div class="odometer-panel" id="pump-odometer-panel">
             <div class="d-flex justify-content-between align-items-center mb-2">
                 <div class="odometer-label mb-0">
                     <i class="bi bi-speedometer2"></i> ODOMETER &mdash; MILES
                 </div>
                 <div class="odometer-edit-badge">
-                    <i class="bi bi-pencil-fill me-1"></i> TAP TO TYPE
+                    <i class="bi bi-pencil-fill me-1"></i> TAP / TYPE DIGITS
                 </div>
             </div>
             <div class="odometer-frame-wrapper">
-                <div class="odometer-frame" id="pump-odometer-frame">
-                    <div class="odo-digit" id="odo-d0"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <div class="odo-digit" id="odo-d1"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <div class="odo-digit" id="odo-d2"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <div class="odo-digit" id="odo-d3"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <div class="odo-digit" id="odo-d4"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <div class="odo-digit" id="odo-d5"><div class="odo-digit-inner"><div class="odo-digit-value">0</div></div></div>
-                    <!-- Transparent overlay input directly over the odometer wheels -->
-                    <input type="text"
-                           inputmode="numeric"
-                           pattern="[0-9]*"
-                           maxlength="7"
-                           id="pump-input-odometer"
-                           class="odometer-overlay-input"
-                           value="@(lastOdo > 0 ? lastOdo.ToString() : "")"
-                           placeholder="@(lastOdo > 0 ? lastOdo.ToString() : "")"
-                           autocomplete="off" />
+                <div class="odometer-frame" id="pump-odometer-frame" data-prev-odo="@lastOdo">
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d0" data-idx="0" value="@odoStr[0]" autocomplete="off" />
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d1" data-idx="1" value="@odoStr[1]" autocomplete="off" />
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d2" data-idx="2" value="@odoStr[2]" autocomplete="off" />
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d3" data-idx="3" value="@odoStr[3]" autocomplete="off" />
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d4" data-idx="4" value="@odoStr[4]" autocomplete="off" />
+                    <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="1" class="odo-digit-input" id="odo-d5" data-idx="5" value="@odoStr[5]" autocomplete="off" />
                 </div>
             </div>
             @if (lastOdo > 0)
@@ -87,6 +79,7 @@
                                id="pump-input-cost"
                                class="pump-display-input"
                                placeholder="0.00"
+                               maxlength="6"
                                autocomplete="off" />
                     </div>
                 </div>
@@ -103,6 +96,7 @@
                                id="pump-input-gallons"
                                class="pump-display-input"
                                placeholder="0.000"
+                               maxlength="6"
                                autocomplete="off" />
                     </div>
                 </div>
