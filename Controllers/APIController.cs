@@ -100,11 +100,11 @@ namespace CarCareTracker.Controllers
             _httpClientFactory = httpClientFactory;
             _dbHealthCheck = dbHealthCheck;
         }
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             //load up documentation
             var apiDocFilePath = _fileHelper.GetFullFilePath("/defaults/api.json");
-            var apiDocText = _fileHelper.GetFileText(apiDocFilePath);
+            var apiDocText = await _fileHelper.GetFileTextAsync(apiDocFilePath);
             var apiDocData = JsonSerializer.Deserialize<List<APIDocumentation>>(apiDocText) ?? new List<APIDocumentation>();
             return View(apiDocData);
         }
@@ -228,7 +228,7 @@ namespace CarCareTracker.Controllers
                     vehicles.Add(_dataAccess.GetVehicleById(vehicleId));
                 } else
                 {
-                    return new RedirectResult("/Error/Unauthorized");
+                    return Forbid();
                 }
             } else
             {
@@ -352,7 +352,7 @@ namespace CarCareTracker.Controllers
             }
             if (!_userLogic.UserCanDirectlyEditVehicle(GetUserID(), id))
             {
-                Response.StatusCode = 401;
+                Response.StatusCode = 403;
                 return Json(OperationResponse.Failed("Access Denied, you don't have access to this vehicle."));
             }
             var result = _userLogic.DeleteAllAccessToVehicle(id) && _vehicleLogic.DeleteVehicleRecords(id);
@@ -410,7 +410,7 @@ namespace CarCareTracker.Controllers
                 {
                     if (!_userLogic.UserCanEditVehicle(GetUserID(), existingVehicle.Id, HouseholdPermission.Edit))
                     {
-                        Response.StatusCode = 401;
+                        Response.StatusCode = 403;
                         return Json(OperationResponse.Failed("Access Denied, you don't have access to this vehicle."));
                     }
                     existingVehicle.Year = int.Parse(input.Year);
@@ -637,7 +637,7 @@ namespace CarCareTracker.Controllers
             {
                 //download file
                 var fullExportFilePath = _fileHelper.GetFullFilePath(result, false);
-                var fileContents = _fileHelper.GetFileBytes(fullExportFilePath);
+                var fileContents = await _fileHelper.GetFileBytesAsync(fullExportFilePath);
                 return File(fileContents, "application/zip", Path.GetFileName(result));
             }
             else if (output.Trim().ToLower() == "email")
@@ -647,7 +647,7 @@ namespace CarCareTracker.Controllers
                 {
                     //download file
                     var fullExportFilePath = _fileHelper.GetFullFilePath(result, false);
-                    var fileContents = _fileHelper.GetFileBytes(fullExportFilePath);
+                    var fileContents = await _fileHelper.GetFileBytesAsync(fullExportFilePath);
                     var emailResponse = await _mailHelper.SendBackupEmail(Path.GetFileName(result), fileContents, defaultEmailAddress);
                     return Json(emailResponse);
                 } 

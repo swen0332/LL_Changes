@@ -8,8 +8,8 @@ namespace CarCareTracker.Helper
     public interface IFileHelper
     {
         string GetFullFilePath(string currentFilePath, bool mustExist = true);
-        byte[] GetFileBytes(string fullFilePath, bool deleteFile = false);
-        string GetFileText(string fullFilePath);
+        Task<byte[]> GetFileBytesAsync(string fullFilePath, bool deleteFile = false);
+        Task<string> GetFileTextAsync(string fullFilePath);
         string MoveFileFromTemp(string currentFilePath, string newFolder);
         bool RenameFile(string currentFilePath, string newName);
         bool DeleteFile(string currentFilePath);
@@ -18,7 +18,7 @@ namespace CarCareTracker.Helper
         string MakeAttachmentsExport(List<GenericReportModel> exportData);
         List<string> GetLanguages();
         List<string> GetThemes();
-        string GetTheme(string themeName);
+        Task<string> GetTheme(string themeName);
         int ClearTempFolder();
         List<string> GetTempFiles();
         int ClearUnlinkedThumbnails(List<string> linkedImages);
@@ -68,7 +68,7 @@ namespace CarCareTracker.Helper
             }
             return defaultList;
         }
-        public string GetTheme(string themeName)
+        public async Task<string> GetTheme(string themeName)
         {
             var themePath = Path.Combine(_webEnv.ContentRootPath, "data", "themes");
             var themeContent = string.Empty;
@@ -78,7 +78,7 @@ namespace CarCareTracker.Helper
                 if (listOfThemes.Any(x=>Path.GetFileNameWithoutExtension(x) == themeName))
                 {
                     string themeFile = listOfThemes.First(x => Path.GetFileNameWithoutExtension(x) == themeName);
-                    themeContent = GetFileText(themeFile);
+                    themeContent = await GetFileTextAsync(themeFile);
                 }
             }
             return themeContent;
@@ -136,11 +136,11 @@ namespace CarCareTracker.Helper
                 return string.Empty;
             }
         }
-        public byte[] GetFileBytes(string fullFilePath, bool deleteFile = false)
+        public async Task<byte[]> GetFileBytesAsync(string fullFilePath, bool deleteFile = false)
         {
             if (File.Exists(fullFilePath))
             {
-                var fileBytes = File.ReadAllBytes(fullFilePath);
+                var fileBytes = await File.ReadAllBytesAsync(fullFilePath);
                 if (deleteFile)
                 {
                     File.Delete(fullFilePath);
@@ -149,11 +149,11 @@ namespace CarCareTracker.Helper
             }
             return Array.Empty<byte>();
         }
-        public string GetFileText(string fullFilePath)
+        public async Task<string> GetFileTextAsync(string fullFilePath)
         {
             if (File.Exists(fullFilePath))
             {
-                var fileText = File.ReadAllText(fullFilePath);
+                var fileText = await File.ReadAllTextAsync(fullFilePath);
                 return fileText;
             }
             return string.Empty;

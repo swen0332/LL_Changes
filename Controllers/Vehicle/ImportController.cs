@@ -17,7 +17,7 @@ namespace CarCareTracker.Controllers
             return PartialView("_BulkDataImporter", mode);
         }
         [HttpGet]
-        public IActionResult GenerateCsvSample(ImportMode mode, int vehicleId)
+        public async Task<IActionResult> GenerateCsvSample(ImportMode mode, int vehicleId)
         {
             string uploadDirectory = "temp/";
             string uploadPath = Path.Combine(_webEnv.ContentRootPath, "data", uploadDirectory);
@@ -198,7 +198,7 @@ namespace CarCareTracker.Controllers
             }
             try
             {
-                var fileBytes = _fileHelper.GetFileBytes(fullExportFilePath, true);
+                var fileBytes = await _fileHelper.GetFileBytesAsync(fullExportFilePath, true);
                 if (fileBytes.Length > 0)
                 {
                     return File(fileBytes, "text/csv", $"{mode.ToString().ToLower()}sample.csv");

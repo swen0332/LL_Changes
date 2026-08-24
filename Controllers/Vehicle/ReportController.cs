@@ -321,7 +321,7 @@ namespace CarCareTracker.Controllers
             return PartialView("Report/_CostTableReport", viewModel);
         }
         [TypeFilter(typeof(CollaboratorFilter))]
-        public IActionResult GetVehicleImageMap(int vehicleId)
+        public async Task<IActionResult> GetVehicleImageMap(int vehicleId)
         {
             var vehicleData = _dataAccess.GetVehicleById(vehicleId);
             VehicleImageMap imageMap = new VehicleImageMap();
@@ -330,7 +330,7 @@ namespace CarCareTracker.Controllers
                 var fullFilePath = _fileHelper.GetFullFilePath(vehicleData.MapLocation);
                 if (!string.IsNullOrWhiteSpace(fullFilePath))
                 {
-                    var fullFileText = _fileHelper.GetFileText(fullFilePath);
+                    var fullFileText = await _fileHelper.GetFileTextAsync(fullFilePath);
                     imageMap = JsonSerializer.Deserialize<VehicleImageMap>(fullFileText) ?? new VehicleImageMap();
                 }
             }

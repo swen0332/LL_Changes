@@ -212,7 +212,7 @@ namespace CarCareTracker.Middleware
                     return Task.CompletedTask;
                 }
             }
-            Response.Redirect("/Error/Unauthorized");
+            Response.Redirect("/Error/403");
             return Task.CompletedTask;
         }
     }

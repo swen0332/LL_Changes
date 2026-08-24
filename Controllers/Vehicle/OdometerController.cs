@@ -162,7 +162,7 @@ namespace CarCareTracker.Controllers
             //security check.
             if (!_userLogic.UserCanEditVehicle(GetUserID(), result.VehicleId, HouseholdPermission.View))
             {
-                return Redirect("/Error/Unauthorized");
+                return Forbid();
             }
             //check for equipment
             var equipmentRecords = _equipmentRecordDataAccess.GetEquipmentRecordsByVehicleId(result.VehicleId).OrderByDescending(x => x.IsEquipped).ThenBy(x => x.Description).ToList();
@@ -219,7 +219,15 @@ namespace CarCareTracker.Controllers
             List<OdometerRecord> odometerRecords = new List<OdometerRecord>();
             foreach (int recordId in recordIds)
             {
-                odometerRecords.Add(_odometerRecordDataAccess.GetOdometerRecordById(recordId));
+                var existingOdometerRecord = _odometerRecordDataAccess.GetOdometerRecordById(recordId);
+                if (_userLogic.UserCanEditVehicle(GetUserID(), existingOdometerRecord.VehicleId, HouseholdPermission.View))
+                {
+                    odometerRecords.Add(existingOdometerRecord);
+                }
+            }
+            if (!odometerRecords.Any())
+            {
+                return Json(result); //nothing to add
             }
             int totalDistance = odometerRecords.Sum(x => x.DistanceTraveled);
             DateTime lastDate = odometerRecords.Max(x => x.Date);

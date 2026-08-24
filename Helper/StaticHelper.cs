@@ -14,7 +14,7 @@ namespace CarCareTracker.Helper
     /// </summary>
     public static class StaticHelper
     {
-        public const string VersionNumber = "1.7.0";
+        public const string VersionNumber = "1.7.1";
         public const string DbName = "data/cartracker.db";
         public const string UserConfigPath = "data/config/userConfig.json";
         public const string ServerConfigPath = "data/config/serverConfig.json";
@@ -1118,6 +1118,10 @@ namespace CarCareTracker.Helper
         public static bool GetPathAllowAPIKeyAuth(PathString path)
         {
             return path.StartsWithSegments("/api") || path.StartsWithSegments("/kiosk") || path.StartsWithSegments("/images") || path.StartsWithSegments("/documents");
+        }
+        public static string GetStaticModalAttribute(bool enablePersistentDialog)
+        {
+            return enablePersistentDialog ? "data-bs-backdrop=static data-bs-keyboard=false" : string.Empty;
         }
     }
 }

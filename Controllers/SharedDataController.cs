@@ -4,18 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CarCareTracker.Controllers
 {
-    [AllowAnonymous]
-    public class ThemeController : Controller
+    public class SharedDataController : Controller
     {
         private readonly IFileHelper _fileHelper;
         private readonly IConfigHelper _config;
-        public ThemeController(IFileHelper fileHelper, IConfigHelper config)
+        
+        public SharedDataController(IFileHelper fileHelper, IConfigHelper config)
         {
             _fileHelper = fileHelper;
             _config = config;
         }
+        [AllowAnonymous]
         [Route("/css/theme.css")]
-        public IActionResult GetConfiguredTheme()
+        public async Task<IActionResult> GetConfiguredTheme()
         {
             string uiTheme = string.Empty;
             string themeContent = string.Empty;
@@ -36,7 +37,7 @@ namespace CarCareTracker.Controllers
             }
             if (!string.IsNullOrWhiteSpace(uiTheme))
             {
-                themeContent = _fileHelper.GetTheme(uiTheme);
+                themeContent = await _fileHelper.GetTheme(uiTheme);
             }
             return Content(themeContent, "text/css");
         }

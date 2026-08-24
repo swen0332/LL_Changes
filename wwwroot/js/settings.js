@@ -53,6 +53,7 @@ function updateSettings() {
         enableAutoOdometerInsert: $("#enableAutoOdometerInsert").is(":checked"),
         enableAutoFillOdometer: $("#enableAutoFillOdometer").is(":checked"),
         enableShopSupplies: $("#enableShopSupplies").is(":checked"),
+        enablePersistentDialog: $("#enablePersistentDialog").is(":checked"),
         showCalendar: $("#showCalendar").is(":checked"),
         showVehicleThumbnail: $("#showVehicleThumbnail").is(":checked"),
         showSearch: $("#showGarageSearch").is(":checked"),
@@ -514,4 +515,20 @@ function searchTranslations() {
         $('.lubelog-translation-row').hide();
         $(`.lubelog-translation-row span:containsNC('${searchTerm}')`).closest('.lubelog-translation-row').show();
     }
+}
+function loadSettingsPage(pageNumber) {
+    $('[data-page-nav]').removeClass('btn-primary');
+    $('[data-page-nav]').addClass('btn-outline-primary');
+    $(`[data-page-nav="${pageNumber}"]`).removeClass('btn-outline-primary');
+    $(`[data-page-nav="${pageNumber}"]`).addClass('btn-primary');
+    $('[data-page]').hide();
+    $(`[data-page="${pageNumber}"]`).show();
+    sessionStorage.setItem('settingsSubTab', pageNumber);
+}
+function renderSettingsSubTab() {
+    let storedSubTab = sessionStorage.getItem('settingsSubTab');
+    if (storedSubTab == null || storedSubTab == undefined || $(`[data-page="${storedSubTab}"]`).length == 0) {
+        storedSubTab = 1;
+    }
+    loadSettingsPage(storedSubTab);
 }

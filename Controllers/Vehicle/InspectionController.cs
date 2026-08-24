@@ -42,7 +42,7 @@ namespace CarCareTracker.Controllers
             //security check.
             if (!_userLogic.UserCanEditVehicle(GetUserID(), existingRecord.VehicleId, HouseholdPermission.View))
             {
-                return Redirect("/Error/Unauthorized");
+                return Forbid();
             }
             if (existingRecord.ReminderRecordId.Any())
             {
