@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Helper;
+using CarCareTracker.Helper;
 using CarCareTracker.Logic;
 using CarCareTracker.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -321,7 +321,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new RedirectResult("/Login");
             }
             return new RedirectResult("/Login");

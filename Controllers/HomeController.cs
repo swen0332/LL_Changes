@@ -194,7 +194,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
             }
             var recordExtraFields = _extraFieldDataAccess.GetExtraFieldsById(record.Id);
             return PartialView("_ExtraFields", recordExtraFields);
@@ -215,7 +215,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return Json(false);
             }
         }
@@ -234,7 +234,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return Json(OperationResponse.Failed());
             }
         }

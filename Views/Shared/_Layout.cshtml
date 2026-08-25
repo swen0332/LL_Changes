@@ -179,6 +179,7 @@
 </head>
 <body>
     @await RenderSectionAsync("Nav", required: false)
+    @Html.AntiForgeryToken()
     <div class="container lubelogger-body-container">
         <main role="main">
             @RenderBody()

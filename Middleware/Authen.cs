@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Helper;
+using CarCareTracker.Helper;
 using CarCareTracker.Logic;
 using CarCareTracker.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -35,6 +35,7 @@ namespace CarCareTracker.Middleware
         {
             if (!enableAuth)
             {
+                Logger.LogWarning("Authentication is disabled (enableAuth=false). System is running in an insecure state with implicit root access.");
                 //generate a fake user ticket to go with it lol.
                 var appIdentity = new ClaimsIdentity("Custom");
                 var userIdentity = new List<Claim>
@@ -55,10 +56,7 @@ namespace CarCareTracker.Middleware
                 var request_header = _httpContext.HttpContext?.Request.Headers["Authorization"] ?? string.Empty;
                 //auth using API Key for API.
                 var apikey_header = _httpContext.HttpContext?.Request.Headers["x-api-key"] ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(apikey_header))
-                {
-                    apikey_header = _httpContext.HttpContext?.Request.Query["apiKey"] ?? string.Empty;
-                }
+
                 if (string.IsNullOrWhiteSpace(access_token) && string.IsNullOrWhiteSpace(request_header) && string.IsNullOrWhiteSpace(apikey_header))
                 {
                     return AuthenticateResult.Fail("Cookie is invalid or does not exist.");

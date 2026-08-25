@@ -1,4 +1,4 @@
-﻿using CarCareTracker.External.Interfaces;
+using CarCareTracker.External.Interfaces;
 using CarCareTracker.Models;
 using Npgsql;
 using System.Text.Json;
@@ -25,7 +25,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
             }
         }
         public UserConfigData GetUserConfig(int userId)
@@ -48,7 +48,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new UserConfigData();
             }
         }
@@ -82,7 +82,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }
@@ -100,7 +100,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }

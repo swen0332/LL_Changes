@@ -1,15 +1,23 @@
-﻿using System.Text.Json.Serialization;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace CarCareTracker.Models
 {
     public class Vehicle
     {
         public int Id { get; set; }
+        [StringLength(2000)]
         public string ImageLocation { get; set; } = "/defaults/noimage.png";
+        [StringLength(2000)]
         public string MapLocation { get; set; } = "";
         public int Year { get; set; }
+        [Required]
+        [StringLength(100)]
         public string Make { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
         public string Model { get; set; } = string.Empty;
+        [StringLength(50)]
         public string LicensePlate { get; set; } = string.Empty;
         [JsonConverter(typeof(FromDateOptional))]
         public string PurchaseDate { get; set; } = string.Empty;

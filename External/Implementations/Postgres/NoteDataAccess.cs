@@ -1,4 +1,4 @@
-﻿using CarCareTracker.External.Interfaces;
+using CarCareTracker.External.Interfaces;
 using CarCareTracker.Models;
 using Npgsql;
 using System.Text.Json;
@@ -24,7 +24,7 @@ namespace CarCareTracker.External.Implementations
                 }
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
             }
         }
         public List<Note> GetNotesByVehicleId(int vehicleId)
@@ -46,7 +46,7 @@ namespace CarCareTracker.External.Implementations
                 return results;
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new List<Note>();
             }
         }
@@ -69,7 +69,7 @@ namespace CarCareTracker.External.Implementations
                 return result;
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new Note();
             }
         }
@@ -113,7 +113,7 @@ namespace CarCareTracker.External.Implementations
                 }
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }
@@ -129,7 +129,7 @@ namespace CarCareTracker.External.Implementations
                 }
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }
@@ -146,7 +146,7 @@ namespace CarCareTracker.External.Implementations
                 }
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }

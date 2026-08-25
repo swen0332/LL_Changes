@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Helper;
+using CarCareTracker.Helper;
 using CarCareTracker.Models;
 using LiteDB;
 using Microsoft.AspNetCore.Authorization;
@@ -527,7 +527,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return Json(OperationResponse.Failed());
             }
         }
@@ -944,7 +944,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return Json(OperationResponse.Failed());
             }
         }

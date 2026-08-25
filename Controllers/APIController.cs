@@ -1,4 +1,4 @@
-﻿using CarCareTracker.External.Interfaces;
+using CarCareTracker.External.Interfaces;
 using CarCareTracker.Filter;
 using CarCareTracker.Helper;
 using CarCareTracker.Logic;
@@ -12,6 +12,7 @@ using System.Text.Json;
 namespace CarCareTracker.Controllers
 {
     [Authorize]
+    [IgnoreAntiforgeryToken]
     public partial class APIController : Controller
     {
         private readonly IVehicleDataAccess _dataAccess;

@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Models;
+using CarCareTracker.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
@@ -50,7 +50,7 @@ namespace CarCareTracker.Logic
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
             }
         }
     }

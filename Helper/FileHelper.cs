@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Models;
+using CarCareTracker.Models;
 using CsvHelper;
 using System.Globalization;
 using System.IO.Compression;
@@ -94,8 +94,9 @@ namespace CarCareTracker.Helper
                     var newFilePath = fullFilePath.Replace(originalFileName, newName);
                     //security: check for path traversal exploit
                     string absoluteFilePath = Path.GetFullPath(newFilePath);
-                    string dataPath = Path.Combine(_webEnv.ContentRootPath, "data");
-                    if (!absoluteFilePath.StartsWith(_webEnv.WebRootPath) && !absoluteFilePath.StartsWith(dataPath))
+                    string dataPath = Path.GetFullPath(Path.Combine(_webEnv.ContentRootPath, "data"));
+                    string webRootPath = Path.GetFullPath(_webEnv.WebRootPath);
+                    if (!absoluteFilePath.StartsWith(webRootPath + Path.DirectorySeparatorChar) && !absoluteFilePath.StartsWith(dataPath + Path.DirectorySeparatorChar) && absoluteFilePath != webRootPath && absoluteFilePath != dataPath)
                     {
                         return false;
                     }
@@ -104,7 +105,7 @@ namespace CarCareTracker.Helper
                 } 
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error renaming file");
                     return false;
                 }
             }
@@ -116,21 +117,22 @@ namespace CarCareTracker.Helper
             {
                 currentFilePath = currentFilePath.Substring(1);
             }
-            string dataPath = Path.Combine(_webEnv.ContentRootPath, "data");
+            string dataPath = Path.GetFullPath(Path.Combine(_webEnv.ContentRootPath, "data"));
+            string webRootPath = Path.GetFullPath(_webEnv.WebRootPath);
             string oldFilePath = currentFilePath.StartsWith("defaults/") ? Path.Combine(_webEnv.WebRootPath, currentFilePath) : Path.Combine(dataPath, currentFilePath);
             //security: check for path traversal exploit
             string absoluteFilePath = Path.GetFullPath(oldFilePath);
-            if (!absoluteFilePath.StartsWith(_webEnv.WebRootPath) && !absoluteFilePath.StartsWith(dataPath))
+            if (!absoluteFilePath.StartsWith(webRootPath + Path.DirectorySeparatorChar) && !absoluteFilePath.StartsWith(dataPath + Path.DirectorySeparatorChar) && absoluteFilePath != webRootPath && absoluteFilePath != dataPath)
             {
                 return string.Empty;
             }
-            if (File.Exists(oldFilePath))
+            if (File.Exists(absoluteFilePath))
             {
-                return oldFilePath;
+                return absoluteFilePath;
             }
             else if (!mustExist)
             {
-                return oldFilePath;
+                return absoluteFilePath;
             }
             {
                 return string.Empty;
@@ -452,11 +454,16 @@ namespace CarCareTracker.Helper
             {
                 currentFilePath = currentFilePath.Substring(1);
             }
-            string uploadPath = Path.Combine(_webEnv.ContentRootPath, "data", newFolder);
-            string oldFilePath = Path.Combine(_webEnv.ContentRootPath, "data", currentFilePath);
+            string dataPath = Path.GetFullPath(Path.Combine(_webEnv.ContentRootPath, "data"));
+            string uploadPath = Path.GetFullPath(Path.Combine(dataPath, newFolder));
+            string oldFilePath = Path.GetFullPath(Path.Combine(dataPath, currentFilePath));
+            if (!uploadPath.StartsWith(dataPath + Path.DirectorySeparatorChar) && uploadPath != dataPath)
+                return currentFilePath;
+            if (!oldFilePath.StartsWith(dataPath + Path.DirectorySeparatorChar) && oldFilePath != dataPath)
+                return currentFilePath;
             if (!Directory.Exists(uploadPath))
                 Directory.CreateDirectory(uploadPath);
-            string newFileUploadPath = oldFilePath.Replace(tempPath, newFolder);
+            string newFileUploadPath = oldFilePath.Replace(tempPath.Replace("/", Path.DirectorySeparatorChar.ToString()), newFolder.Replace("/", Path.DirectorySeparatorChar.ToString()));
             if (File.Exists(oldFilePath))
             {
                 File.Move(oldFilePath, newFileUploadPath);
@@ -470,8 +477,9 @@ namespace CarCareTracker.Helper
             {
                 currentFilePath = currentFilePath.Substring(1);
             }
-            string filePath = Path.Combine(_webEnv.ContentRootPath, "data", currentFilePath);
-            if (!filePath.StartsWith(_webEnv.ContentRootPath))
+            string dataPath = Path.GetFullPath(Path.Combine(_webEnv.ContentRootPath, "data"));
+            string filePath = Path.GetFullPath(Path.Combine(dataPath, currentFilePath));
+            if (!filePath.StartsWith(dataPath + Path.DirectorySeparatorChar) && filePath != dataPath)
             {
                 return false; //path traversal
             }
@@ -573,7 +581,7 @@ namespace CarCareTracker.Helper
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     return string.Empty;
                 }
             }
@@ -593,7 +601,7 @@ namespace CarCareTracker.Helper
                 return true;
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             } 
         }
@@ -609,7 +617,7 @@ namespace CarCareTracker.Helper
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }
@@ -629,7 +637,7 @@ namespace CarCareTracker.Helper
                 return tempFileName;
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return string.Empty;
             }
         }

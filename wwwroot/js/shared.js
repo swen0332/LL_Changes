@@ -2335,3 +2335,14 @@ function removeVehicleThumbnail() {
     $("#inputImageReplaceLabel").addClass('d-none');
     $("#inputImageUploadLabel").removeClass('d-none');
 }
+
+$.ajaxSetup({
+    beforeSend: function (xhr, settings) {
+        if (settings.type == 'POST' || settings.type == 'PUT' || settings.type == 'DELETE') {
+            var token = $('input[name="__RequestVerificationToken"]').val();
+            if (token) {
+                xhr.setRequestHeader("RequestVerificationToken", token);
+            }
+        }
+    }
+});

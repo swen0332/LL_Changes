@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Filter;
+using CarCareTracker.Filter;
 using CarCareTracker.Helper;
 using CarCareTracker.MapProfile;
 using CarCareTracker.Models;
@@ -210,7 +210,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return Json(OperationResponse.Failed($"An error has occurred while generating CSV sample: {ex.Message}"));
             }
         }

@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Filter;
+using CarCareTracker.Filter;
 using CarCareTracker.Helper;
 using CarCareTracker.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -586,7 +586,7 @@ namespace CarCareTracker.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     vehicleHistory.DaysOwned = string.Empty;
                 }
                 //calculate depreciation

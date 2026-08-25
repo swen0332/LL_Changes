@@ -1,4 +1,4 @@
-﻿using CarCareTracker.External.Interfaces;
+using CarCareTracker.External.Interfaces;
 using CarCareTracker.Models;
 using Npgsql;
 
@@ -40,7 +40,7 @@ namespace CarCareTracker.External.Implementations
                 }
             } catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new ServerHealthCheck { Name = "LubeLogger database connections health check" };
             }
         }

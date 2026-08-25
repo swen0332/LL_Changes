@@ -22,9 +22,20 @@ namespace CarCareTracker.Controllers
             _mimeTypeProvider = new FileExtensionContentTypeProvider();
         }
 
+        private bool IsValidFileExtension(string fileName)
+        {
+            var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".pdf", ".csv", ".txt", ".doc", ".docx", ".xls", ".xlsx", ".zip" };
+            var extension = Path.GetExtension(fileName).ToLowerInvariant();
+            return allowedExtensions.Contains(extension);
+        }
+
         [HttpPost]
         public IActionResult HandleFileUpload(IFormFile file)
         {
+            if (!IsValidFileExtension(file.FileName))
+            {
+                return BadRequest("Invalid file extension.");
+            }
             var fileName = UploadFile(file);
             return Json(fileName);
         }
@@ -76,6 +87,10 @@ namespace CarCareTracker.Controllers
             List<UploadedFiles> uploadedFiles = new List<UploadedFiles>();
             foreach (IFormFile fileToUpload in file)
             {
+                if (!IsValidFileExtension(fileToUpload.FileName))
+                {
+                    continue;
+                }
                 var fileName = UploadFile(fileToUpload);
                 uploadedFiles.Add(new UploadedFiles { Name = fileToUpload.FileName, Location = fileName, IsPending = true});
             }

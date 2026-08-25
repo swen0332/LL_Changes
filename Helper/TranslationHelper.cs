@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Models;
+using CarCareTracker.Models;
 using Microsoft.Extensions.Caching.Memory;
 using System.Text.Json;
 
@@ -45,7 +45,7 @@ namespace CarCareTracker.Helper
                         return translationDictionary ?? new Dictionary<string, string>();
                     } catch (Exception ex)
                     {
-                        _logger.LogError(ex.Message);
+                        _logger.LogError(ex, "Error occurred");
                         return new Dictionary<string, string>();
                     }
                 }
@@ -84,7 +84,7 @@ namespace CarCareTracker.Helper
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     return new Dictionary<string, string>();
                 }
             }
@@ -120,7 +120,7 @@ namespace CarCareTracker.Helper
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     return new Dictionary<string, string>();
                 }
             }
@@ -166,7 +166,7 @@ namespace CarCareTracker.Helper
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return OperationResponse.Failed();
             }
         }

@@ -38,7 +38,10 @@ StaticHelper.InitMessage(builder.Configuration);
 StaticHelper.CheckMigration(builder.Environment.WebRootPath, builder.Environment.ContentRootPath);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
+});
 
 //LiteDB is always injected even if user uses Postgres.
 builder.Services.AddSingleton<ILiteDBHelper, LiteDBHelper>();
@@ -135,13 +138,13 @@ builder.Services.AddAuthorization(options =>
 //configure max file upload size
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = int.MaxValue; // if don't set default value is: 30 MB
+    options.Limits.MaxRequestBodySize = 52428800; // 50 MB
 });
 builder.Services.Configure<FormOptions>(options =>
 {
-    options.ValueLengthLimit = int.MaxValue;
-    options.MultipartBodyLengthLimit = int.MaxValue; // if don't set default value is: 128 MB
-    options.MultipartHeadersLengthLimit = int.MaxValue;
+    options.ValueLengthLimit = 52428800;
+    options.MultipartBodyLengthLimit = 52428800; // 50 MB
+    options.MultipartHeadersLengthLimit = 52428800;
 });
 
 var app = builder.Build();

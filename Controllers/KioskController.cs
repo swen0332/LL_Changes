@@ -46,7 +46,7 @@ namespace CarCareTracker.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return View(new KioskViewModel());
             }
         }

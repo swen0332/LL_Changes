@@ -1,4 +1,4 @@
-﻿using CarCareTracker.Models;
+using CarCareTracker.Models;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
@@ -238,7 +238,7 @@ namespace CarCareTracker.Helper
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     return OperationResponse.Failed();
                 }
             }
@@ -278,7 +278,7 @@ namespace CarCareTracker.Helper
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message);
+                    _logger.LogError(ex, "Error occurred");
                     return false;
                 }
             }

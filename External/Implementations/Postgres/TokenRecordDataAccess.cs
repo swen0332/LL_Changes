@@ -1,4 +1,4 @@
-﻿using CarCareTracker.External.Interfaces;
+using CarCareTracker.External.Interfaces;
 using CarCareTracker.Models;
 using Npgsql;
 
@@ -24,7 +24,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
             }
         }
         public List<Token> GetTokens()
@@ -49,7 +49,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new List<Token>();
             }
         }
@@ -74,7 +74,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new Token();
             }
         }
@@ -99,7 +99,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return new Token();
             }
         }
@@ -118,7 +118,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }
@@ -135,7 +135,7 @@ namespace CarCareTracker.External.Implementations
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, "Error occurred");
                 return false;
             }
         }

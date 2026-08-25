@@ -1,4 +1,6 @@
-﻿namespace CarCareTracker.Models
+using System.ComponentModel.DataAnnotations;
+
+namespace CarCareTracker.Models
 {
     public class GasRecord
     {
@@ -16,6 +18,7 @@
         public decimal Cost { get; set; }
         public bool IsFillToFull { get; set; } = true;
         public bool MissedFuelUp { get; set; } = false;
+        [StringLength(10000)]
         public string Notes { get; set; } = string.Empty;
         public int StartingSoc { get; set; } = 20;
         public int EndingSoc { get; set; } = 80;
