@@ -1,8 +1,6 @@
 name: Upstream Sync
 
 on:
-  schedule:
-    - cron: '0 0 * * 0' # Runs automatically every Sunday at midnight
   workflow_dispatch: # Allows you to run this workflow manually from the Actions tab
 
 permissions:
