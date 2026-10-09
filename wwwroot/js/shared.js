@@ -2346,3 +2346,10 @@ $.ajaxSetup({
         }
     }
 });
+
+function hideActiveModal() {
+    let activeModal = $(".modal.show");
+    if (activeModal.length > 0) {
+        activeModal.modal('hide');
+    }
+}
