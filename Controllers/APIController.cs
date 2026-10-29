@@ -266,10 +266,12 @@ namespace CarCareTracker.Controllers
                 return Json(convertedOdometer);
             }
         }
+        [TypeFilter(typeof(APIKeyFilter), Arguments = new object[] { HouseholdPermission.Edit })]
         [HttpPost]
         [Route("/api/vehicles/add")]
         [Consumes("application/json")]
         public IActionResult AddVehicleJson([FromBody] VehicleImportModel input) => AddVehicle(input);
+        [TypeFilter(typeof(APIKeyFilter), Arguments = new object[] { HouseholdPermission.Edit })]
         [HttpPost]
         [Route("/api/vehicles/add")]
         public IActionResult AddVehicle(VehicleImportModel input)
